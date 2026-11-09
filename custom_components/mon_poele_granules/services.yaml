@@ -1,0 +1,72 @@
+ajouter_achat:
+  name: Ajouter un achat
+  description: Enregistre un achat et augmente le stock.
+  fields:
+    sacs:
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 10000
+          step: 1
+    montant_eur:
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 100000
+          step: 0.01
+    date:
+      selector:
+        date: {}
+    note:
+      selector:
+        text: {}
+corriger_stock:
+  name: Corriger le stock
+  description: Saisie du stock réellement disponible en sacs.
+  fields:
+    sacs_reels:
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 10000
+          step: 0.1
+    date:
+      selector:
+        date: {}
+    note:
+      selector:
+        text: {}
+ajouter_entretien:
+  name: Ajouter un entretien
+  description: Enregistre un entretien et son échéance future.
+  fields:
+    entretien:
+      required: true
+      selector:
+        text: {}
+    date:
+      selector:
+        date: {}
+    prochaine_date:
+      selector:
+        date: {}
+    note:
+      selector:
+        text: {}
+demarrer_calibration:
+  name: Démarrer calibration
+  description: Démarre une période de mesure.
+terminer_calibration:
+  name: Terminer calibration
+  description: Calibre les kg/h selon les sacs réellement consommés pendant la période.
+  fields:
+    sacs_consommes:
+      required: true
+      selector:
+        number:
+          min: 0.01
+          max: 1000
+          step: 0.01
