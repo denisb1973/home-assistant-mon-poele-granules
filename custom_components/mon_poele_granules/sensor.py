@@ -76,7 +76,7 @@ class PelletSensor(SensorEntity):
     def extra_state_attributes(self):
         d = self.manager.data
         if self.key == "consommation_totale":
-            return {"historique_jour": d.get("by_day", {}), "derniere_calibration": d.get("last_calibration")}
+            return {"historique_jour": d.get("by_day", {}), "derniere_calibration": d.get("last_calibration"), "historique_importe": d.get("legacy_history", [])}
         if self.key == "stock_kg":
             return {"achats_recents": d["purchases"][-10:], "ajustements_recents": d["adjustments"][-10:]}
         if self.key == "entretien_prochain":
