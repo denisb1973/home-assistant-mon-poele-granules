@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.16 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.17 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -253,6 +253,75 @@ class MonPoeleGranulesCard extends HTMLElement {
             .dashboard-nav .nav-icon svg{width:17px;height:17px}
           }
           #chart svg{height:auto;min-height:0!important}
+
+          /* v0.3.17 : photo du salon plein fond, valeurs en verre translucide */
+          .wrap[data-view] > .home-scene{display:none!important;grid-column:1/-1!important;grid-row:auto!important}
+          .wrap[data-view="accueil"] > .home-scene{
+            display:flex!important;
+          }
+          .home-scene{
+            position:relative;isolation:isolate;overflow:hidden;
+            flex-direction:column;justify-content:flex-end;
+            min-width:0;box-sizing:border-box;
+            min-height:clamp(610px,calc(100dvh - 175px),900px);
+            padding:clamp(10px,1.7vw,20px);
+            border-radius:18px;
+            border:1px solid rgba(205,222,245,.18);
+            background:#1b2532;
+          }
+          .home-scene > .stove-hero{
+            position:absolute!important;inset:0!important;
+            box-sizing:border-box;width:100%!important;height:100%!important;
+            margin:0!important;padding:0!important;min-height:0!important;
+            border:0!important;border-radius:0!important;
+            background:transparent!important;box-shadow:none!important;
+            display:block!important;pointer-events:none!important;z-index:0!important;
+          }
+          .home-scene > .stove-hero > .room-scene{
+            position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+          }
+          .home-scene::before{
+            content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+            background:linear-gradient(180deg,rgba(9,15,26,.07) 0%,rgba(9,15,26,.02) 31%,rgba(10,15,25,.12) 51%,rgba(9,16,27,.55) 100%);
+          }
+          .home-scene > #stats{
+            position:relative;z-index:2;margin-top:auto;
+            display:grid!important;gap:clamp(6px,1vw,10px)!important;
+            grid-template-columns:repeat(4,minmax(0,1fr))!important;
+            align-items:stretch!important;
+          }
+          .home-scene > #stats .tile{
+            min-width:0!important;height:clamp(65px,7.5vw,78px)!important;
+            padding:8px 12px!important;border-radius:13px!important;
+            background:rgba(18,28,42,.34)!important;
+            border:1px solid rgba(236,243,255,.30)!important;
+            box-shadow:0 4px 18px rgba(0,0,0,.12),inset 0 1px 0 rgba(255,255,255,.09)!important;
+            -webkit-backdrop-filter:blur(9px);backdrop-filter:blur(9px);
+            color:white;justify-content:center;gap:7px;
+          }
+          .home-scene > #stats .tile-stock{
+            background:rgba(13,70,53,.38)!important;
+            border-color:rgba(115,226,174,.55)!important;
+          }
+          .home-scene > #stats .tile-next{border-color:rgba(242,183,95,.42)!important}
+          .home-scene > #stats .tile .label{color:#f0f3f7!important;font-size:clamp(10px,1vw,13px)!important}
+          .home-scene > #stats .tile .value{color:#fff!important;font-size:clamp(19px,2.2vw,25px)!important;margin:0!important}
+          .home-scene > #stats .tile .unit{color:#e9f0fb!important}
+          .home-scene > #stats .tile-icon{font-size:clamp(14px,1.4vw,18px)!important}
+          @media(max-width:699px){
+            .home-scene{min-height:790px;padding:10px}
+            .home-scene > #stats{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+            .home-scene > #stats .tile{height:64px!important;padding:7px 10px!important;gap:3px}
+            .home-scene > #stats .tile .label{font-size:11px!important}
+            .home-scene > #stats .tile .value{font-size:21px!important}
+            .home-scene::before{background:linear-gradient(180deg,transparent 0%,rgba(9,15,26,.05) 19%,rgba(10,15,26,.2) 35%,rgba(9,16,27,.67) 100%)}
+          }
+          @media(min-width:700px) and (max-width:980px){
+            .home-scene{min-height:clamp(585px,calc(100dvh - 185px),850px)}
+          }
+          @media(prefers-reduced-transparency:reduce){
+            .home-scene > #stats .tile{background:rgba(15,25,38,.83)!important}
+          }
 </style>
         <ha-card><div class="wrap">
           <div class="head"><h2>Mon Poêle à Granulés</h2><div id="running" class="running-indicator"></div></div>
@@ -264,9 +333,10 @@ class MonPoeleGranulesCard extends HTMLElement {
             <button type="button" data-view-button="comparaison"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20V14h4v6M10 20V9h4v11M17 20V4h4v16M2 21h20"/></svg></span><span>Comparaison</span></button>
             <button type="button" data-view-button="parametres"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M10 2h4l.7 3 2 .9 2.6-1.5 2.8 2.8-1.5 2.6.9 2 .5.2v3l-3 .7-.9 2 1.5 2.6-2.8 2.8-2.6-1.5-2 .9-.7 3h-4l-.7-3-2-.9-2.6 1.5-2.8-2.8 1.5-2.6-.9-2-.5-.2v-3l3-.7.9-2L2.7 7.2 5.5 4.4 8 5.9l2-.9Z"/></svg></span><span>Réglages</span></button>
           </nav>
+          <div class="home-scene" aria-label="Tableau de bord sur la photo du salon">
           <div class="stove-hero" id="stove-hero" data-active="unknown" aria-label="État du poêle">
 
-            <svg class="room-scene" viewBox="0 0 1536 864" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Salon avec poêle à granulés blanc et noir">
+            <svg class="room-scene" viewBox="0 0 1536 864" preserveAspectRatio="xMinYMid slice" role="img" aria-label="Salon avec poêle à granulés blanc et noir">
               <defs>
                 <linearGradient id="glassShade" x1="0" y1="0" x2="1" y2="0">
                   <stop offset="0" stop-color="#120f11"/><stop offset=".55" stop-color="#1b1819"/><stop offset="1" stop-color="#0d0b0c"/>
@@ -284,6 +354,7 @@ class MonPoeleGranulesCard extends HTMLElement {
             
           </div>
           <div class="grid" id="stats"></div>
+          </div>
           <div class="section section-chart"><h3><span class="section-symbol">📈</span> Évolution de la consommation <span class="section-subtitle">Octobre — septembre</span></h3><div id="chart"></div></div><div class="section section-seasons"><h3><span class="section-symbol">💶</span> Prix moyen du sac par saison</h3><div id="metric-controls" style="display:flex;flex-wrap:wrap;gap:7px"></div><div id="seasons"></div></div>
           <div class="section section-tools"><h3><span class="section-symbol">⚙️</span> Gestion du poêle</h3><div class="actions">
             <button data-open="stock">Corriger stock</button>
