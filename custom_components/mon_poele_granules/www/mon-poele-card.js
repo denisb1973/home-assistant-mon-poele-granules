@@ -32,6 +32,12 @@ class MonPoeleGranulesCard extends HTMLElement {
           .barcol{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:end;align-items:center;height:100%}
           .bar{width:100%;max-width:26px;border-radius:5px 5px 0 0;background:var(--primary-color,#03a9f4);min-height:2px}
           .barlabel{font-size:10px;opacity:.8;margin-top:4px} .msg{font-size:12px;margin-top:9px}
+          select{box-sizing:border-box;width:100%;margin-top:4px;padding:9px;border-radius:7px;border:1px solid var(--divider-color,#777);color:var(--primary-text-color);background:var(--primary-background-color,#222);font:inherit}
+          .section h3{font-size:15px;letter-spacing:.03em}
+          .section svg{display:block;margin:8px auto}
+          #maintenance [title]{cursor:help}
+          #metric-controls button{font-weight:650;padding:9px 13px}
+          @media(max-width:520px){.wrap{padding:12px}.section{margin-top:24px}.section svg{min-height:120px}}
           @media(min-width:680px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
           @media(max-width:410px){.fields{grid-template-columns:1fr}.tile .value{font-size:20px}}
         </style>
