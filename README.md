@@ -61,7 +61,7 @@ Ces ID sont des exemples : ils doivent être adaptés aux vrais ID visibles dans
 
 La carte utilise les actions de l'intégration pour les formulaires d'achat, correction du stock, entretien et calibration. Elle affiche l'historique récemment stocké dans les attributs des capteurs.
 
-**Version 0.2.2 expérimentale** : installation du tableau de bord à valider dans Home Assistant. Aucune modification des données existantes du poêle n'est effectuée par l'ajout de la carte.
+**Version 0.3.0 expérimentale** : installation du tableau de bord à valider dans Home Assistant. Aucune modification des données existantes du poêle n'est effectuée par l'ajout de la carte.
 
 ## Types d'intervention
 Le formulaire **+ Entretien** offre trois choix : Entretien, Dépannage et Révision. Chaque intervention garde ses dates et sa description. Les anciennes interventions restent inchangées.
@@ -72,3 +72,15 @@ Le formulaire **+ Entretien** offre trois choix : Entretien, Dépannage et Révi
 La ressource Lovelace est chargée depuis une **URL fixe** : `/mon_poele_granules/mon-poele-card.js`. Dans les paramètres **Ressources** de Home Assistant, remplacer **une seule fois** l'ancienne URL avec `?v=020` ou `?v=021` par cette URL fixe, en conservant le type **Module JavaScript**. Ne pas créer de ressource en double. Les prochaines mises à jour ne demanderont plus aucune modification du YAML de la carte : `type: custom:mon-poele-granules-card`.
 
 Après une mise à jour HACS, redémarrer Home Assistant si nécessaire puis actualiser la page pour charger le JavaScript récent. Home Assistant ne garantit pas le chargement instantané d'une mise à jour sur les navigateurs déjà ouverts. La mise à jour HACS doit encore être installée par l'utilisateur ; la publication n'impose aucun déploiement automatique sur l'instance.
+
+## Nouvelle présentation de la carte — v0.3.0
+- Graphique mensuel : histogramme rouge de consommation en **kg**, courbe verte du **coût estimé** à partir du prix moyen des achats disponibles.
+- Prix moyen pondéré du sac par saison, avec boutons **Prix moyen**, **Entretien**, **Dépannage**, **Révision**, **Achat** et **Total**.
+- Dernières saisies : achats, entretiens et journées avec consommation estimée.
+- Calendrier mensuel coloré, navigable par flèches, des achats, consommations et interventions.
+- Formulaire **+ Entretien** : vrai menu déroulant natif **Entretien / Dépannage / Révision**, adapté à l'iPhone.
+- La ressource JavaScript et le YAML de la carte gardent la **même adresse fixe**.
+
+L'affichage historique commence avec les données effectivement stockées par cette intégration. Aucune ancienne saisie d'une autre intégration n'est importée automatiquement. Les graphiques saisonniers utilisent les entrées récentes exposées par les capteurs (actuellement dix achats et dix interventions au maximum). Les coûts de granulés sont estimatifs : l'électricité ne mesure pas directement les kg brûlés.
+
+Mise à jour : **HACS → Mon Poêle à Granulés → Mettre à jour / Retélécharger → redémarrer Home Assistant**. Recharger ensuite la vue (sur iPhone, fermer puis rouvrir l'application si l'ancien visuel persiste). Ne pas modifier le YAML de carte `type: custom:mon-poele-granules-card` ni l'URL fixe `/mon_poele_granules/mon-poele-card.js`.
