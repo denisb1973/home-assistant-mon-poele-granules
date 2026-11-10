@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.4 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.5 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -37,6 +37,10 @@ class MonPoeleGranulesCard extends HTMLElement {
           .section svg{display:block;margin:8px auto}
           #maintenance [title]{cursor:pointer}
           #maintenance button[data-date]{border:0;width:100%;padding:0;font:inherit;cursor:pointer}
+          #maintenance .day-cell{min-width:0;position:relative;overflow:hidden;border-radius:8px}
+          #maintenance .day-actions{display:flex;position:absolute;bottom:2px;left:2px;right:2px;gap:2px;justify-content:center}
+          #maintenance button[data-day-action]{border:0;border-radius:5px;background:rgba(25,25,25,.64);color:white;padding:2px 0;flex:1;min-width:0;height:21px;font-size:12px;line-height:16px;cursor:pointer}
+          #maintenance button[data-day-action]:focus-visible{outline:2px solid white}
           #maintenance button[data-date]:focus-visible{outline:3px solid var(--primary-color,#ffa726)}
           .calendar-choice{margin:14px 0;padding:13px;border:1px solid var(--divider-color,#555);border-radius:12px;background:var(--secondary-background-color,rgba(130,130,130,.12))}
           .calendar-choice[hidden]{display:none}
@@ -78,6 +82,13 @@ class MonPoeleGranulesCard extends HTMLElement {
       this.shadowRoot.getElementById("prev-month").onclick=()=>this.shiftMonth(-1);
       this.shadowRoot.getElementById("next-month").onclick=()=>this.shiftMonth(1);
       this.shadowRoot.getElementById("maintenance").addEventListener("click",e=>{
+        const action=e.target.closest("button[data-day-action]");
+        if(action){
+          this._selectedCalendarDay=action.dataset.date;
+          this.showCalendarChoices();
+          this.openForm(action.dataset.dayAction,action.dataset.date);
+          return;
+        }
         const button=e.target.closest("button[data-date]");
         if(button)this.selectCalendarDay(button.dataset.date);
       });
@@ -205,7 +216,10 @@ class MonPoeleGranulesCard extends HTMLElement {
         colors.length===2?"linear-gradient(135deg,"+colors[0]+" 0%, "+colors[0]+" 49.8%, "+colors[1]+" 50.2%, "+colors[1]+" 100%)":
         "conic-gradient("+colors.map((c,j)=>c+" "+(j*100/colors.length)+"% "+((j+1)*100/colors.length)+"%").join(",")+")";
       const current=date===this.dayKey(new Date());
-      return '<button type="button" data-date="'+date+'" title="'+this.escape(mk.map(x=>x.title).join(" ; "))+'" aria-label="'+this.escape(date+" "+mk.map(x=>x.title).join(", "))+'" style="box-sizing:border-box;display:flex;align-items:center;justify-content:center;min-height:clamp(56px,10vw,92px);border-radius:8px;background:'+background+';font-size:clamp(15px,2.6vw,22px);font-weight:'+(mk.length?700:400)+';color:'+(mk.length?"#fff":"inherit")+';'+(current?"outline:2px solid var(--primary-color,#ffa726);outline-offset:-2px;":"")+'">'+(i+1)+'</button>';
+      return '<div class="day-cell" style="background:'+background+';'+(current?'outline:2px solid var(--primary-color,#ffa726);outline-offset:-2px;':'')+'">'+
+        '<button type="button" data-date="'+date+'" title="'+this.escape(mk.map(x=>x.title).join(" ; "))+'" aria-label="Choisir le '+date+'" style="box-sizing:border-box;display:flex;align-items:flex-start;padding-top:8px;justify-content:center;min-height:clamp(56px,10vw,92px);font-size:clamp(15px,2.6vw,22px);font-weight:'+(mk.length?700:400)+';color:'+(mk.length?'#fff':'inherit')+';background:transparent">'+(i+1)+'</button>'+
+        '<div class="day-actions"><button type="button" data-day-action="purchase" data-date="'+date+'" aria-label="Ajouter un achat le '+date+'" title="Achat">🛒</button>'+
+        '<button type="button" data-day-action="maintenance" data-date="'+date+'" aria-label="Ajouter une intervention le '+date+'" title="Intervention">🔧</button></div></div>';
     }).join("");
     this.shadowRoot.getElementById("maintenance").innerHTML='<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px">'+head+blanks+cells+'</div>';
     this.showCalendarChoices();
