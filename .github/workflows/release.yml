@@ -1,0 +1,29 @@
+name: Publish HACS release
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'custom_components/mon_poele_granules/manifest.json'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Publish version from integration manifest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=$(python3 -c 'import json; print(json.load(open("custom_components/mon_poele_granules/manifest.json"))["version"])')
+          TAG="v${VERSION}"
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            echo "Release ${TAG} already exists."
+            exit 0
+          fi
+          git tag "${TAG}"
+          git push origin "${TAG}"
+          gh release create "${TAG}" --title "Mon Poêle à Granulés ${TAG}" --notes "Mise à jour de l'intégration et du tableau de bord. Installer via HACS puis redémarrer Home Assistant. Le YAML et l'URL de la carte restent inchangés."
