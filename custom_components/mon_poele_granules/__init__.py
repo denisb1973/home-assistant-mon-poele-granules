@@ -163,10 +163,13 @@ class PelletManager:
 
 async def async_setup_entry(hass, entry):
     if not hass.data.get('_mon_poele_granules_card_registered'):
-        card_path = Path(__file__).parent / 'www' / 'mon-poele-card.js'
-        await hass.http.async_register_static_paths([
-            StaticPathConfig('/mon_poele_granules/mon-poele-card.js', str(card_path), False)
-        ])
+        www_path = Path(__file__).parent / 'www'
+        card_path = www_path / 'mon-poele-card.js'
+        static_paths = [StaticPathConfig('/mon_poele_granules/mon-poele-card.js', str(card_path), False)]
+        gif_path = www_path / 'poele-granules-anime.gif'
+        if gif_path.is_file():
+            static_paths.append(StaticPathConfig('/mon_poele_granules/poele-granules-anime.gif', str(gif_path), False))
+        await hass.http.async_register_static_paths(static_paths)
         hass.data['_mon_poele_granules_card_registered'] = True
     manager = PelletManager(hass, entry)
     await manager.load()
