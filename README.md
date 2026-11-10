@@ -22,14 +22,14 @@ La puissance supérieure au seuil réglé indique que le poêle est en marche. �
 
 Un calendrier affiche achats, entretiens effectués et prochaines échéances.
 
-## Tableau de bord personnalisé — version 0.2.0
+## Tableau de bord personnalisé — version 0.2.1
 La carte `mon-poele-granules-card` (compatible iPhone et PC) affiche le stock en sacs/kg, la consommation du jour/mois et sur sept jours, les heures de fonctionnement, les achats et l'entretien.
 
 Après la mise à jour HACS et le redémarrage Home Assistant :
 
 1. Ouvrir un tableau de bord puis **Modifier le tableau de bord**.
 2. Dans **⋮ → Gérer les ressources** (parfois Paramètres → Tableaux de bord → Ressources), ajouter le module JavaScript suivant :
-   - URL : `/mon_poele_granules/mon-poele-card.js?v=020`
+   - URL : `/mon_poele_granules/mon-poele-card.js?v=021`
    - Type : **Module JavaScript**.
 3. Créer une nouvelle carte **Manuelle** et saisir :
 
@@ -61,4 +61,7 @@ Ces ID sont des exemples : ils doivent être adaptés aux vrais ID visibles dans
 
 La carte utilise les actions de l'intégration pour les formulaires d'achat, correction du stock, entretien et calibration. Elle affiche l'historique récemment stocké dans les attributs des capteurs.
 
-**Version 0.2.0 expérimentale** : installation du tableau de bord à valider dans Home Assistant. Aucune modification des données existantes du poêle n'est effectuée par l'ajout de la carte.
+**Version 0.2.1 expérimentale** : installation du tableau de bord à valider dans Home Assistant. Aucune modification des données existantes du poêle n'est effectuée par l'ajout de la carte.
+
+## Types d'intervention
+Le formulaire **+ Entretien** offre trois choix : Entretien, Dépannage et Révision. Chaque intervention garde ses dates et sa description. Les anciennes interventions restent inchangées.
