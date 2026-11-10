@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.19 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.20 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -327,6 +327,58 @@ class MonPoeleGranulesCard extends HTMLElement {
           }
           @media(prefers-reduced-transparency:reduce){
             .wrap[data-view="accueil"] > #stats .tile{background:rgba(16,26,39,.82)!important}
+          }
+
+          /* v0.3.20 - paysage iPad: photo moins haute, le poêle reste entièrement visible.
+             Les cartes sont dans la zone DROITE de la photo, sans modification du HTML. */
+          @media(min-width:700px){
+            .wrap[data-view="accueil"] > .stove-hero{
+              height:clamp(420px,calc(100dvh - 185px),620px)!important;
+              min-height:0!important;
+              max-height:620px!important;
+            }
+            .wrap[data-view="accueil"] > #stats{
+              grid-template-columns:repeat(3,minmax(0,1fr))!important;
+              padding:10px 12px 12px 34%!important;
+              gap:7px!important;
+              align-self:end!important;
+            }
+            .wrap[data-view="accueil"] > #stats .tile{
+              height:clamp(52px,6.8dvh,68px)!important;
+              padding:6px 9px!important;
+              border-radius:10px!important;
+              gap:2px!important;
+              background:rgba(15,25,39,.43)!important;
+            }
+            .wrap[data-view="accueil"] > #stats .tile-stock{
+              background:rgba(10,69,49,.50)!important;
+            }
+            .wrap[data-view="accueil"] > #stats .tile .label{
+              font-size:clamp(10px,1.05vw,12px)!important;
+              line-height:1.12!important;
+            }
+            .wrap[data-view="accueil"] > #stats .tile .value{
+              font-size:clamp(17px,1.9vw,23px)!important;
+              line-height:1.05!important;
+            }
+          }
+          /* Sur téléphone, on libère le poêle en haut, valeurs sous celui-ci. */
+          @media(max-width:699px){
+            .wrap[data-view="accueil"] > .stove-hero{
+              height:clamp(650px,calc(100dvh - 130px),840px)!important;
+              min-height:0!important;
+              max-height:840px!important;
+            }
+            .wrap[data-view="accueil"] > #stats{
+              padding:9px!important;
+              grid-template-columns:repeat(2,minmax(0,1fr))!important;
+              align-self:end!important;
+            }
+            .wrap[data-view="accueil"] > #stats .tile{
+              height:57px!important;
+              padding:6px 9px!important;
+            }
+            .wrap[data-view="accueil"] > #stats .tile .value{font-size:19px!important}
           }
 </style>
         <ha-card><div class="wrap">
