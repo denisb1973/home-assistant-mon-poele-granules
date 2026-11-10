@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.25 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.26 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -472,6 +472,14 @@ class MonPoeleGranulesCard extends HTMLElement {
           .stove-hero .stove-real-fire{position:absolute!important;display:none!important;z-index:2!important;pointer-events:none!important;max-width:none!important;max-height:none!important;object-fit:fill!important}
           .stove-hero[data-active="on"] .stove-real-fire{display:block!important}
           .stove-hero[data-active="off"] .stove-real-fire,.stove-hero[data-active="unknown"] .stove-real-fire{display:none!important}
+          /* v0.3.26 — portrait GIF photo si disponible, ancien visuel conservé sinon */
+          .stove-hero .stove-animated-portrait{display:none;position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center center;z-index:1;pointer-events:none;background:#151515}
+          .stove-hero[data-active="on"][data-gif-ready="true"] .stove-animated-portrait{display:block}
+          .stove-hero[data-active="on"][data-gif-ready="true"] .room-scene,
+          .stove-hero[data-active="on"][data-gif-ready="true"] .stove-real-fire{visibility:hidden!important}
+          @media(max-width:699px){
+            .wrap[data-view="accueil"] > .stove-hero{height:clamp(360px,calc(100dvh - 245px),590px)!important;max-height:590px!important}
+          }
 </style>
         <ha-card><div class="wrap">
           <div class="head"><h2>Mon Poêle à Granulés</h2><div id="running" class="running-indicator"></div></div>
@@ -483,7 +491,7 @@ class MonPoeleGranulesCard extends HTMLElement {
             <button type="button" data-view-button="comparaison"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20V14h4v6M10 20V9h4v11M17 20V4h4v16M2 21h20"/></svg></span><span>Comparaison</span></button>
             <button type="button" data-view-button="parametres"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M10 2h4l.7 3 2 .9 2.6-1.5 2.8 2.8-1.5 2.6.9 2 .5.2v3l-3 .7-.9 2 1.5 2.6-2.8 2.8-2.6-1.5-2 .9-.7 3h-4l-.7-3-2-.9-2.6 1.5-2.8-2.8 1.5-2.6-.9-2-.5-.2v-3l3-.7.9-2L2.7 7.2 5.5 4.4 8 5.9l2-.9Z"/></svg></span><span>Réglages</span></button>
           </nav>
-          <div class="stove-hero" id="stove-hero" data-active="unknown" aria-label="État du poêle">
+          <div class="stove-hero" id="stove-hero" data-active="unknown" data-gif-ready="false" aria-label="État du poêle">\n            <img class="stove-animated-portrait" id="stove-animated-portrait" src="/mon_poele_granules/poele-granules-anime.gif" alt="" aria-hidden="true" decoding="async"/>
 
             <svg class="room-scene" viewBox="0 0 1536 864" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Salon avec poêle à granulés blanc et noir">
               <defs>
@@ -635,6 +643,13 @@ class MonPoeleGranulesCard extends HTMLElement {
       isOn?"🟢 En marche":isOff?"⚪ Éteint":"⚠️ État inconnu";
     const hero=this.shadowRoot.getElementById("stove-hero");
     hero.dataset.active=isOn?"on":isOff?"off":"unknown";
+    const portrait=this.shadowRoot.getElementById("stove-animated-portrait");
+    if(portrait && !portrait.dataset.eventsBound){
+      portrait.dataset.eventsBound="true";
+      portrait.addEventListener("load",()=>{hero.dataset.gifReady=portrait.naturalWidth>0?"true":"false";});
+      portrait.addEventListener("error",()=>{hero.dataset.gifReady="false";});
+      if(portrait.complete && portrait.naturalWidth>0)hero.dataset.gifReady="true";
+    }
     // Sur mobile, un cadrage centré coupe le poêle placé à gauche de la photo.
     // On utilise les coordonnées de la photo source pour cadrer sur le poêle et sa vitre.
     const scene=this.shadowRoot.querySelector(".room-scene");
