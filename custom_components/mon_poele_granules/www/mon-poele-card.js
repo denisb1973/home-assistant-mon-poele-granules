@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.15 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.16 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -231,16 +231,38 @@ class MonPoeleGranulesCard extends HTMLElement {
             .wrap[data-view] > .head h2{font-size:15px!important}
             .wrap[data-view] > .head .running-indicator{font-size:11px!important;padding:5px 7px!important}
           }
+
+          /* v0.3.16 : calendrier compact, pictogrammes vectoriels, axe kilogrammes */
+          .dashboard-nav button .nav-icon{display:flex;align-items:center;justify-content:center}
+          .dashboard-nav .nav-icon svg{width:21px;height:21px;display:block}
+          #maintenance .day-cell{border-radius:6px}
+          #maintenance button[data-date]{min-height:0}
+          #maintenance .day-actions{bottom:2px;left:3px;right:3px;gap:3px}
+          #maintenance button[data-day-action]{height:18px!important;padding:0 2px!important;border-radius:4px!important;display:flex;align-items:center;justify-content:center;color:#e9f2ff;background:rgba(17,27,42,.65)!important}
+          #maintenance button[data-day-action] svg{height:14px;width:14px;display:block;flex:none}
+          #maintenance button[data-day-action]:active{background:rgba(120,83,190,.85)!important}
+          #maintenance .day-cell button[data-date]{padding-top:5px!important;align-items:flex-start!important}
+          .section-calendar{padding-top:12px!important}
+          .section-calendar h3{margin-bottom:8px!important}
+          .section-calendar #prev-month,.section-calendar #next-month{min-width:32px;min-height:32px;padding:5px}
+          @media(max-width:520px){
+            #maintenance button[data-day-action] svg{width:12px;height:12px}
+            #maintenance button[data-day-action]{height:16px!important}
+            #maintenance .day-actions{gap:1px;left:1px;right:1px}
+            #maintenance .day-cell button[data-date]{font-size:13px!important}
+            .dashboard-nav .nav-icon svg{width:17px;height:17px}
+          }
+          #chart svg{height:auto;min-height:0!important}
 </style>
         <ha-card><div class="wrap">
           <div class="head"><h2>Mon Poêle à Granulés</h2><div id="running" class="running-indicator"></div></div>
           <nav class="dashboard-nav" aria-label="Navigation du poêle">
-            <button type="button" data-view-button="accueil" aria-current="page"><span class="nav-icon" aria-hidden="true">⌂</span><span>Accueil</span></button>
-            <button type="button" data-view-button="consommation"><span class="nav-icon" aria-hidden="true">▥</span><span>Conso.</span></button>
-            <button type="button" data-view-button="historique"><span class="nav-icon" aria-hidden="true">▦</span><span>Historique</span></button>
-            <button type="button" data-view-button="calendrier"><span class="nav-icon" aria-hidden="true">▣</span><span>Calendrier</span></button>
-            <button type="button" data-view-button="comparaison"><span class="nav-icon" aria-hidden="true">⌁</span><span>Comparaison</span></button>
-            <button type="button" data-view-button="parametres"><span class="nav-icon" aria-hidden="true">⚙</span><span>Réglages</span></button>
+            <button type="button" data-view-button="accueil" aria-current="page"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 10 9-7 9 7"/><path d="M5 9v12h14V9M9 21v-8h6v8"/></svg></span><span>Accueil</span></button>
+            <button type="button" data-view-button="consommation"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V11M10 20V5M16 20v-9M22 20V8"/><path d="M2 21h20"/></svg></span><span>Conso.</span></button>
+            <button type="button" data-view-button="historique"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v5h5M12 7v5l4 2"/></svg></span><span>Historique</span></button>
+            <button type="button" data-view-button="calendrier"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18M8 14h3v3H8z"/></svg></span><span>Calendrier</span></button>
+            <button type="button" data-view-button="comparaison"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20V14h4v6M10 20V9h4v11M17 20V4h4v16M2 21h20"/></svg></span><span>Comparaison</span></button>
+            <button type="button" data-view-button="parametres"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M10 2h4l.7 3 2 .9 2.6-1.5 2.8 2.8-1.5 2.6.9 2 .5.2v3l-3 .7-.9 2 1.5 2.6-2.8 2.8-2.6-1.5-2 .9-.7 3h-4l-.7-3-2-.9-2.6 1.5-2.8-2.8 1.5-2.6-.9-2-.5-.2v-3l3-.7.9-2L2.7 7.2 5.5 4.4 8 5.9l2-.9Z"/></svg></span><span>Réglages</span></button>
           </nav>
           <div class="stove-hero" id="stove-hero" data-active="unknown" aria-label="État du poêle">
 
@@ -396,11 +418,23 @@ class MonPoeleGranulesCard extends HTMLElement {
     const monthly=months.map(d=>({label:d.toLocaleDateString("fr-FR",{month:"short"}),kg:Object.keys(days).filter(k=>k.startsWith(this.dayKey(d).slice(0,7))).reduce((a,k)=>a+(+days[k].kg||0),0)+Object.keys(historicalKg).filter(k=>k.startsWith(this.dayKey(d).slice(0,7))).reduce((a,k)=>a+historicalKg[k],0)}));
     const maxKg=Math.max(1,...monthly.map(x=>x.kg));
     const maxCost=Math.max(1,...monthly.map(x=>x.kg*price/15));
-    const base=162,step=720/monthly.length,barWidth=Math.min(36,step*.40);
-    const pts=monthly.map((x,i)=>(i*step+step/2)+","+(base-x.kg*price/15/maxCost*125)).join(" ");
-    const bars=monthly.map((x,i)=>'<rect x="'+(i*step+step/2-barWidth/2)+'" y="'+(base-x.kg/maxKg*125)+'" width="'+barWidth+'" height="'+(x.kg/maxKg*125)+'" fill="#e74747" rx="4"/>').join("");
-    const labels=monthly.map((x,i)=>'<text x="'+(i*step+step/2)+'" y="185" font-size="14" font-weight="'+(months[i].getMonth()===now.getMonth()&&months[i].getFullYear()===now.getFullYear()?700:400)+'" fill="'+(months[i].getMonth()===now.getMonth()&&months[i].getFullYear()===now.getFullYear()?'#55bd72':'currentColor')+'" text-anchor="middle">'+this.escape(x.label)+'</text>').join("");
-    this.shadowRoot.getElementById("chart").innerHTML='<svg viewBox="0 0 720 200" style="width:100%" role="img" aria-label="Consommation mensuelle et coût estimé">'+bars+'<polyline points="'+pts+'" stroke="#55bd72" stroke-width="4" fill="none"/>'+labels+'</svg><div class="small" style="text-align:center">🔴 kg consommés · 🟢 coût estimé (€)</div><p class="small">Coût estimé à partir du prix moyen des achats enregistrés. Les données antérieures à l’installation ne sont pas disponibles.</p>';
+    const rawStep=maxKg/4;
+    const decade=Math.pow(10,Math.floor(Math.log10(rawStep)));
+    const niceStep=[1,2,2.5,5,10].map(n=>n*decade).find(n=>n>=rawStep)||10*decade;
+    const axisMax=Math.max(1,Math.ceil(maxKg/niceStep)*niceStep);
+    const base=162,top=37,plotHeight=base-top,left=56,plotWidth=682;
+    const step=plotWidth/monthly.length,barWidth=Math.min(32,step*.40);
+    const formatTick=n=>Number(n.toFixed(2)).toLocaleString("fr-FR");
+    const kgAxis='<text x="6" y="20" font-size="14" font-weight="700" fill="#cbd7e7">kg</text>'+
+      Array.from({length:5},(_,i)=>{
+        const value=i*axisMax/4,yy=base-i*plotHeight/4;
+        return '<line x1="'+left+'" y1="'+yy+'" x2="'+(left+plotWidth)+'" y2="'+yy+'" stroke="#9eafc8" stroke-opacity=".23" stroke-dasharray="'+(i?'4 5':'')+'"/>'+
+        '<text x="'+(left-9)+'" y="'+(yy+4)+'" text-anchor="end" font-size="12" fill="#cbd7e7">'+formatTick(value)+'</text>';
+      }).join("");
+    const pts=monthly.map((x,i)=>(left+i*step+step/2)+","+(base-x.kg*price/15/maxCost*plotHeight)).join(" ");
+    const bars=monthly.map((x,i)=>'<rect x="'+(left+i*step+step/2-barWidth/2)+'" y="'+(base-x.kg/axisMax*plotHeight)+'" width="'+barWidth+'" height="'+(x.kg/axisMax*plotHeight)+'" fill="#e74747" rx="4"/>').join("");
+    const labels=monthly.map((x,i)=>'<text x="'+(left+i*step+step/2)+'" y="185" font-size="14" font-weight="'+(months[i].getMonth()===now.getMonth()&&months[i].getFullYear()===now.getFullYear()?700:400)+'" fill="'+(months[i].getMonth()===now.getMonth()&&months[i].getFullYear()===now.getFullYear()?'#55bd72':'currentColor')+'" text-anchor="middle">'+this.escape(x.label)+'</text>').join("");
+    this.shadowRoot.getElementById("chart").innerHTML='<svg viewBox="0 0 760 205" style="width:100%" role="img" aria-label="Consommation mensuelle en kilogrammes avec échelle verticale à gauche">'+kgAxis+bars+'<polyline points="'+pts+'" stroke="#55bd72" stroke-width="4" fill="none"/>'+labels+'</svg><div class="small" style="text-align:center">🔴 kg consommés · 🟢 coût estimé (€)</div><p class="small">Coût estimé à partir du prix moyen des achats enregistrés. Les données antérieures à l’installation ne sont pas disponibles.</p>';
     const types=[["prix","Prix moyen"],["entretien","Entretien"],["depannage","Dépannage"],["revision","Révision"],["achat","Achat"],["total","Total"]];
     const controls=this.shadowRoot.getElementById("metric-controls");
     controls.innerHTML=types.map(x=>'<button data-metric="'+x[0]+'" style="'+(this._chartMetric===x[0]?'background:#ffa726;color:#191919;':'')+'border-radius:25px">'+x[1]+'</button>').join("");
@@ -444,11 +478,11 @@ class MonPoeleGranulesCard extends HTMLElement {
         "conic-gradient("+colors.map((c,j)=>c+" "+(j*100/colors.length)+"% "+((j+1)*100/colors.length)+"%").join(",")+")";
       const current=date===this.dayKey(new Date());
       return '<div class="day-cell" style="background:'+background+';'+(current?'outline:2px solid var(--primary-color,#ffa726);outline-offset:-2px;':'')+'">'+
-        '<button type="button" data-date="'+date+'" title="'+this.escape(mk.map(x=>x.title).join(" ; "))+'" aria-label="Choisir le '+date+'" style="box-sizing:border-box;display:flex;align-items:flex-start;padding-top:8px;justify-content:center;min-height:clamp(56px,10vw,92px);font-size:clamp(15px,2.6vw,22px);font-weight:'+(mk.length?700:400)+';color:'+(mk.length?'#fff':'inherit')+';background:transparent">'+(i+1)+'</button>'+
-        '<div class="day-actions"><button type="button" data-day-action="purchase" data-date="'+date+'" aria-label="Ajouter un achat le '+date+'" title="Achat">🛒</button>'+
-        '<button type="button" data-day-action="maintenance" data-date="'+date+'" aria-label="Ajouter une intervention le '+date+'" title="Intervention">🔧</button></div></div>';
+        '<button type="button" data-date="'+date+'" title="'+this.escape(mk.map(x=>x.title).join(" ; "))+'" aria-label="Choisir le '+date+'" style="box-sizing:border-box;display:flex;align-items:flex-start;padding-top:8px;justify-content:center;min-height:clamp(43px,6vw,58px);font-size:clamp(13px,1.7vw,18px);font-weight:'+(mk.length?700:400)+';color:'+(mk.length?'#fff':'inherit')+';background:transparent">'+(i+1)+'</button>'+
+        '<div class="day-actions"><button type="button" data-day-action="purchase" data-date="'+date+'" aria-label="Ajouter un achat le '+date+'" title="Achat"> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l3 13h12l3-10H5"/></svg></button>'+
+        '<button type="button" data-day-action="maintenance" data-date="'+date+'" aria-label="Ajouter une intervention le '+date+'" title="Intervention"> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3a6 6 0 0 1-8 8L6.5 19a2.5 2.5 0 0 1-3.5-3.5L11 9a6 6 0 0 1 8-8l-4 4 4 4z"/></svg></button></div></div>';
     }).join("");
-    this.shadowRoot.getElementById("maintenance").innerHTML='<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px">'+head+blanks+cells+'</div>';
+    this.shadowRoot.getElementById("maintenance").innerHTML='<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px">'+head+blanks+cells+'</div>';
     this.showCalendarChoices();
   }
 
