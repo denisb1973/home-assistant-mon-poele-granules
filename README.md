@@ -84,3 +84,13 @@ Après une mise à jour HACS, redémarrer Home Assistant si nécessaire puis act
 L'affichage historique commence avec les données effectivement stockées par cette intégration. Aucune ancienne saisie d'une autre intégration n'est importée automatiquement. Les graphiques saisonniers utilisent les entrées récentes exposées par les capteurs (actuellement dix achats et dix interventions au maximum). Les coûts de granulés sont estimatifs : l'électricité ne mesure pas directement les kg brûlés.
 
 Mise à jour : **HACS → Mon Poêle à Granulés → Mettre à jour / Retélécharger → redémarrer Home Assistant**. Recharger ensuite la vue (sur iPhone, fermer puis rouvrir l'application si l'ancien visuel persiste). Ne pas modifier le YAML de carte `type: custom:mon-poele-granules-card` ni l'URL fixe `/mon_poele_granules/mon-poele-card.js`.
+
+## Importer ton historique de l'ancienne intégration (v0.3.1)
+
+La carte possède maintenant le bouton **Importer CSV** dans « Achats et entretiens ». Sur iPhone ou PC, sélectionner le fichier `suivi_stock_pellet_export.csv`. Les champs attendus sont `Saison;Date;Type;Quantite;Prix par sac;Prix total;Note`.
+
+L'import conserve les lignes historiques séparément des compteurs de l'intégration. Il ne modifie **jamais** le stock actuel, les heures de fonctionnement ni les compteurs en temps réel. Un réimport remplace l'historique précédemment importé au lieu de le dupliquer. Les 44 sacs achetés et les 3 sacs consommés présents dans l'ancien export sont affichés dans l'historique et les graphiques, sans réajustement de ton stock déjà initialisé à 615 kg.
+
+Si le bouton n'est pas présent sur iPhone après mise à jour HACS et redémarrage Home Assistant, fermer entièrement l'application puis la rouvrir pour vider le cache de la carte.
+
+Attention : dans cette version, le montant des consommations historiques est évalué avec un prix moyen et non avec le prix réel de chaque sac brûlé.
