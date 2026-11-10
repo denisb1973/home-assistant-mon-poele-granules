@@ -96,6 +96,60 @@ class MonPoeleGranulesCard extends HTMLElement {
       `<div class="tile"><div class="label">${this.escape(title)}</div><div class="value">${this.escape(k==="next"?(this.find("next")?.state||"—"):this.number(k))} <span class="unit">${unit}</span></div></div>`).join("");
     this.renderHistory();
   }
+
+  dayKey(date){return date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");}
+  season(date){const y=+String(date).slice(0,4),m=+String(date).slice(5,7);return !y||!m?"":(m>=10?y:y-1)+"-"+(m>=10?y+1:y);}
+  shiftMonth(n){this._calendarDate=new Date(this._calendarDate.getFullYear(),this._calendarDate.getMonth()+n,1);this.renderHistory();}
+  renderHistory(){
+    const purchases=this.find("stock")?.attributes.achats_recents||[];
+    const tasks=this.find("next")?.attributes.entretiens_recents||[];
+    const days=this.find("total")?.attributes.historique_jour||{};
+    const totalBags=purchases.reduce((a,x)=>a+(+x.bags||0),0);
+    const price=totalBags?purchases.reduce((a,x)=>a+(+x.total_eur||0),0)/totalBags:0;
+    const now=new Date(),months=Array.from({length:12},(_,i)=>new Date(now.getFullYear(),now.getMonth()-11+i,1));
+    const monthly=months.map(d=>({label:d.toLocaleDateString("fr-FR",{month:"short"}),kg:Object.keys(days).filter(k=>k.startsWith(this.dayKey(d).slice(0,7))).reduce((a,k)=>a+(+days[k].kg||0),0)}));
+    const maxKg=Math.max(1,...monthly.map(x=>x.kg));
+    const maxCost=Math.max(1,...monthly.map(x=>x.kg*price/15));
+    const base=162;
+    const pts=monthly.map((x,i)=>(i*60+30)+","+(base-x.kg*price/15/maxCost*125)).join(" ");
+    const bars=monthly.map((x,i)=>'<rect x="'+(i*60+17)+'" y="'+(base-x.kg/maxKg*125)+'" width="26" height="'+(x.kg/maxKg*125)+'" fill="#e74747" rx="4"/>').join("");
+    const labels=monthly.map((x,i)=>'<text x="'+(i*60+30)+'" y="185" font-size="12" fill="currentColor" text-anchor="middle">'+this.escape(x.label)+'</text>').join("");
+    this.shadowRoot.getElementById("chart").innerHTML='<svg viewBox="0 0 720 200" style="width:100%" role="img" aria-label="Consommation mensuelle et coût estimé">'+bars+'<polyline points="'+pts+'" stroke="#55bd72" stroke-width="4" fill="none"/>'+labels+'</svg><div class="small" style="text-align:center">🔴 kg consommés · 🟢 coût estimé (€)</div><p class="small">Coût estimé à partir du prix moyen des achats enregistrés. Les données antérieures à l’installation ne sont pas disponibles.</p>';
+    const types=[["prix","Prix moyen"],["entretien","Entretien"],["depannage","Dépannage"],["revision","Révision"],["achat","Achat"],["total","Total"]];
+    const controls=this.shadowRoot.getElementById("metric-controls");
+    controls.innerHTML=types.map(x=>'<button data-metric="'+x[0]+'" style="'+(this._chartMetric===x[0]?'background:#ffa726;color:#191919;':'')+'border-radius:25px">'+x[1]+'</button>').join("");
+    controls.querySelectorAll("button").forEach(b=>b.onclick=()=>{this._chartMetric=b.dataset.metric;this.renderHistory()});
+    const seasons={};
+    const item=k=>seasons[k]||(seasons[k]={euros:0,bags:0,achat:0,entretien:0,depannage:0,revision:0,total:0});
+    purchases.forEach(x=>{const k=this.season(x.date);if(k){const a=item(k);a.euros+=+x.total_eur||0;a.bags+=+x.bags||0;a.achat++;a.total++;}});
+    tasks.forEach(x=>{const k=this.season(x.date);if(k){const a=item(k),t=String(x.description||"").toLowerCase();a[t.includes("dépann")?"depannage":t.includes("révision")?"revision":"entretien"]++;a.total++;}});
+    const keys=Object.keys(seasons).sort().slice(-6),metric=this._chartMetric;
+    const values=keys.map(k=>metric==="prix"?(seasons[k].bags?seasons[k].euros/seasons[k].bags:0):seasons[k][metric]);
+    const maximum=Math.max(1,...values);
+    const coords=values.map((v,i)=>({x:keys.length===1?360:45+i*630/(keys.length-1),y:155-v/maximum*112,v}));
+    this.shadowRoot.getElementById("seasons").innerHTML=keys.length?
+      '<svg viewBox="0 0 720 200" style="width:100%" role="img" aria-label="Évolution par saison"><polyline fill="none" stroke="#55bd72" stroke-width="4" points="'+coords.map(p=>p.x+','+p.y).join(' ')+'"/>'+
+      coords.map((p,i)=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="5" fill="#55bd72"/><text x="'+p.x+'" y="'+Math.max(16,p.y-12)+'" text-anchor="middle" font-size="13" fill="#55bd72">'+p.v.toLocaleString("fr-FR",{maximumFractionDigits:2})+(metric==="prix"?" €/sac":"")+'</text><text x="'+p.x+'" y="180" text-anchor="middle" fill="currentColor" font-size="12">'+this.escape(keys[i])+'</text>').join("")+'</svg>':
+      '<p class="small">Les saisons apparaîtront après les premières saisies.</p>';
+    const rows=[
+      ...purchases.map(x=>({date:x.date,type:"🛒 Achat",detail:x.bags+" sac(s) · "+x.total_eur+" €",note:x.note||""})),
+      ...tasks.map(x=>({date:x.date,type:"🛠 "+x.description,detail:x.next_due?"Prochain : "+x.next_due:"",note:x.note||""})),
+      ...Object.entries(days).filter(([k,v])=>(+v.kg||0)>0).map(([k,v])=>({date:k,type:"🔥 Consommation estimée",detail:(+v.kg).toFixed(2)+" kg",note:""}))
+    ].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+    this.shadowRoot.getElementById("purchases").innerHTML=rows.length?rows.map(x=>'<div class="line"><b>'+this.escape(x.type)+" · "+this.escape(x.date)+'</b><div class="small">'+this.escape(x.detail)+(x.note?" · "+this.escape(x.note):"")+'</div></div>').join(""):'<div class="small">Aucune saisie pour le moment</div>';
+    const d=this._calendarDate,y=d.getFullYear(),m=d.getMonth(),prefix=this.dayKey(d).slice(0,7);
+    const marks={};
+    const mark=(date,color,title)=>{if(String(date).slice(0,7)===prefix)(marks[date]||(marks[date]=[])).push({color,title});};
+    purchases.forEach(x=>mark(x.date,"#30aa65","Achat"));
+    tasks.forEach(x=>{const t=String(x.description||"").toLowerCase(),color=t.includes("dépann")?"#2196f3":t.includes("révision")?"#9c27b0":"#ffa726";mark(x.date,color,x.description);if(x.next_due)mark(x.next_due,color,"Prévu : "+x.description);});
+    Object.entries(days).forEach(([date,v])=>{if((+v.kg||0)>0)mark(date,"#e74747","Consommation");});
+    const start=(d.getDay()+6)%7,count=new Date(y,m+1,0).getDate();
+    this.shadowRoot.getElementById("month-label").textContent=d.toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
+    const head=["L","M","M","J","V","S","D"].map(x=>'<div style="text-align:center;opacity:.65">'+x+'</div>').join("");
+    const blanks=Array.from({length:start},()=>'<div></div>').join("");
+    const cells=Array.from({length:count},(_,i)=>{const date=this.dayKey(new Date(y,m,i+1)),mk=marks[date]||[];return '<div title="'+this.escape(mk.map(x=>x.title).join(" ; "))+'" style="text-align:center;border-radius:7px;background:var(--secondary-background-color,rgba(120,120,120,.13));min-height:43px;padding:8px 2px">'+(i+1)+'<div style="display:flex;gap:3px;justify-content:center;margin-top:5px">'+mk.map(x=>'<i style="width:7px;height:7px;border-radius:50%;background:'+x.color+'"></i>').join("")+'</div></div>';}).join("");
+    this.shadowRoot.getElementById("maintenance").innerHTML='<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px">'+head+blanks+cells+'</div>';
+  }
   openForm(type){
     this._formType=type;
     const el=this.shadowRoot.getElementById("form");
