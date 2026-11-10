@@ -171,7 +171,7 @@ class MonPoeleGranulesCard extends HTMLElement {
     const marks={};
     const mark=(date,color,title)=>{if(String(date).slice(0,7)===prefix)(marks[date]||(marks[date]=[])).push({color,title});};
     combinedPurchases.forEach(x=>mark(x.date,"#30aa65","Achat"));
-    combinedTasks.forEach(x=>{const t=String(x.description||"").toLowerCase(),color=t.includes("dépann")?"#2196f3":t.includes("révision")?"#9c27b0":"#ffa726";mark(x.date,color,x.description);if(x.next_due)mark(x.next_due,color,"Prévu : "+x.description);});
+    combinedTasks.forEach(x=>{const t=String(x.description||"").toLowerCase(),note=String(x.note||"").toLowerCase(),color=t.includes("dépann")?"#2196f3":note.includes("nettoyage")?"#7416ad":t.includes("révision")?"#9c27b0":"#ffa726";mark(x.date,color,x.description);if(x.next_due)mark(x.next_due,color,"Prévu : "+x.description);});
     Object.entries(days).forEach(([date,v])=>{if((+v.kg||0)>0)mark(date,"#e74747","Consommation");});
     Object.entries(historicalKg).forEach(([date,kg])=>{if(kg>0)mark(date,"#e74747","Consommation historique : "+kg+" kg");});
     const start=(d.getDay()+6)%7,count=new Date(y,m+1,0).getDate();
