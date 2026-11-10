@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.10 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.11 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -193,6 +193,8 @@ class MonPoeleGranulesCard extends HTMLElement {
             .stove-details .small{font-size:11px!important}
           }
           @media(min-width:900px){.stove-hero{min-height:310px!important}.stove-details{max-width:50%}}
+          /* La photo reste libre : l’état est indiqué une seule fois dans l’en-tête. */
+          .stove-hero{justify-content:center!important}
 </style>
         <ha-card><div class="wrap">
           <div class="head"><div><div class="eyebrow">TABLEAU DE BORD • GRANULÉS</div><h2>Mon Poêle à Granulés</h2><div class="small">Stock, consommation et entretien</div></div><div id="running" class="running-indicator"></div></div>
@@ -216,7 +218,7 @@ class MonPoeleGranulesCard extends HTMLElement {
                 <path class="hero-fire-c" d="M366 508 Q358 493 370 477 Q381 493 378 500 Q387 495 388 491 Q393 506 387 508 Z" fill="#fff4c3"/>
               </g>
             </svg>
-            <div class="stove-details"><div id="stove-status" class="stove-status unknown">État inconnu</div><div class="small" id="stove-subtitle">Animation synchronisée avec le capteur de fonctionnement.</div></div>
+            
           </div>
           <div class="grid" id="stats"></div>
           <div class="section section-chart"><h3><span class="section-symbol">📈</span> Évolution de la consommation <span class="section-subtitle">Octobre — septembre</span></h3><div id="chart"></div></div><div class="section section-seasons"><h3><span class="section-symbol">💶</span> Prix moyen du sac par saison</h3><div id="metric-controls" style="display:flex;flex-wrap:wrap;gap:7px"></div><div id="seasons"></div></div>
@@ -302,12 +304,6 @@ class MonPoeleGranulesCard extends HTMLElement {
     const hero=this.shadowRoot.getElementById("stove-hero");
     hero.dataset.active=isOn?"on":isOff?"off":"unknown";
     hero.setAttribute("aria-label",isOn?"Poêle en marche, flamme animée":isOff?"Poêle éteint, sans flamme":"État du poêle inconnu");
-    const status=this.shadowRoot.getElementById("stove-status");
-    status.textContent=isOn?"🔥 Poêle en marche":isOff?"Poêle éteint":"État inconnu";
-    status.className="stove-status "+(isOn?"on":isOff?"off":"unknown");
-    this.shadowRoot.getElementById("stove-subtitle").textContent=isOn?
-      "Flamme animée • consommation suivie automatiquement":isOff?
-      "Flamme éteinte • poêle à l'arrêt":"En attente du capteur de fonctionnement";
     const stats=[
       ["Stock","stock","kg"],["Sacs disponibles","sacs","sacs"],
       ["Aujourd'hui","today","kg"],["Ce mois","month","kg"],
