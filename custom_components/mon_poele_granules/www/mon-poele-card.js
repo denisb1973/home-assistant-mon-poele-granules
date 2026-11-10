@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.7 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.8 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -137,6 +137,17 @@ class MonPoeleGranulesCard extends HTMLElement {
           @media(max-width:520px){.wrap{padding:12px}.section{margin-top:24px}.section svg{min-height:120px}}
           @media(min-width:680px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
           @media(max-width:410px){.fields{grid-template-columns:1fr}.tile .value{font-size:20px}}
+          /* Mise en page compacte iPhone : v0.3.8 */
+          #stats{gap:7px!important}
+          #stats .tile{box-sizing:border-box;height:76px!important;min-height:0!important;padding:9px 11px!important;border-radius:11px!important}
+          #stats .tile-top{gap:6px!important}
+          #stats .tile-icon{font-size:13px!important}
+          #stats .tile .label{font-size:11px!important;line-height:1.16}
+          #stats .tile .value{margin:0!important;font-size:22px!important;line-height:1.15!important}
+          #stats .tile .unit{font-size:11px!important}
+          .wrap{gap:9px!important}
+          @media(max-width:450px){#stats .tile{height:69px!important;padding:8px 9px!important}#stats .tile .value{font-size:20px!important}}
+          @media(min-width:900px){#stats .tile{height:auto!important;min-height:58px!important}}
         </style>
         <ha-card><div class="wrap">
           <div class="head"><div><div class="eyebrow">TABLEAU DE BORD • GRANULÉS</div><h2>Mon Poêle à Granulés</h2><div class="small">Stock, consommation et entretien</div></div><div id="running" class="running-indicator"></div></div>
