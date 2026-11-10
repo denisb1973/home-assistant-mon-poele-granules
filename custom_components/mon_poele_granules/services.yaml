@@ -70,3 +70,14 @@ terminer_calibration:
           min: 0.01
           max: 1000
           step: 0.01
+
+importer_historique:
+  name: Importer l'historique CSV
+  description: Importe l'ancien historique des achats, consommations et entretiens sans modifier le stock courant. Réimporter un fichier remplace le précédent historique importé.
+  fields:
+    csv_text:
+      name: Contenu du fichier CSV
+      required: true
+      selector:
+        text:
+          multiline: true
