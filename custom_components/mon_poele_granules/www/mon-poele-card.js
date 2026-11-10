@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.23 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.24 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -611,6 +611,16 @@ class MonPoeleGranulesCard extends HTMLElement {
       isOn?"🟢 En marche":isOff?"⚪ Éteint":"⚠️ État inconnu";
     const hero=this.shadowRoot.getElementById("stove-hero");
     hero.dataset.active=isOn?"on":isOff?"off":"unknown";
+    // Sur mobile, un cadrage centré coupe le poêle placé à gauche de la photo.
+    // On utilise les coordonnées de la photo source pour cadrer sur le poêle et sa vitre.
+    const scene=this.shadowRoot.querySelector(".room-scene");
+    if(scene){
+      const mobile=typeof window!=="undefined" && window.matchMedia("(max-width:699px)").matches;
+      const targetViewBox=mobile?"80 0 540 864":"0 0 1536 864";
+      if(scene.getAttribute("viewBox")!==targetViewBox)scene.setAttribute("viewBox",targetViewBox);
+      const ratio=mobile?"xMinYMid slice":"xMidYMid slice";
+      if(scene.getAttribute("preserveAspectRatio")!==ratio)scene.setAttribute("preserveAspectRatio",ratio);
+    }
     hero.setAttribute("aria-label",isOn?"Poêle en marche, flamme animée":isOff?"Poêle éteint, sans flamme":"État du poêle inconnu");
     const stats=[
       ["Stock","stock","kg"],["Sacs disponibles","sacs","sacs"],
