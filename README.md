@@ -97,3 +97,6 @@ Attention : dans cette version, le montant des consommations historiques est év
 
 ## Présentation de la saison et du calendrier (v0.3.3)
 Le graphique de consommation affiche désormais **toute la saison d’octobre à septembre**, y compris les mois à venir sans consommation, comme dans la carte d’origine. Le mois courant est mis en évidence. Le calendrier présente de grandes cases colorées : vert pour les achats, rouge pour les consommations, orange pour les entretiens, bleu pour les dépannages, violet pour les révisions ou anciens nettoyages. Deux événements différents le même jour créent une case bicolore en diagonale. La modification est purement visuelle : le stock et les historiques ne sont pas recalculés.
+
+## Calendrier interactif — v0.3.4
+Toucher un jour du calendrier ouvre les choix **Ajouter un achat** ou **Ajouter une intervention** (Entretien, Dépannage, Révision). La date choisie est préremplie. Les boutons d'ajout Achat et Entretien ne sont plus affichés au-dessus du calendrier ; **Corriger stock**, **Calibrer** et **Importer CSV** restent disponibles. Aucun changement au stockage ou aux données existantes. Les nouvelles saisies ne sont prises en compte qu'après confirmation dans le formulaire.
