@@ -214,6 +214,9 @@ class MonPoeleGranulesCard extends HTMLElement {
   selectCalendarDay(date){
     if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
     this._selectedCalendarDay=date;
+    const existingForm=this.shadowRoot.getElementById('form');
+    existingForm.classList.remove('open');
+    existingForm.innerHTML='';
     this.showCalendarChoices();
     this.shadowRoot.getElementById("calendar-choice").scrollIntoView({behavior:"smooth",block:"nearest"});
   }
