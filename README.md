@@ -94,3 +94,6 @@ L'import conserve les lignes historiques séparément des compteurs de l'intégr
 Si le bouton n'est pas présent sur iPhone après mise à jour HACS et redémarrage Home Assistant, fermer entièrement l'application puis la rouvrir pour vider le cache de la carte.
 
 Attention : dans cette version, le montant des consommations historiques est évalué avec un prix moyen et non avec le prix réel de chaque sac brûlé.
+
+## Présentation de la saison et du calendrier (v0.3.3)
+Le graphique de consommation affiche désormais **toute la saison d’octobre à septembre**, y compris les mois à venir sans consommation, comme dans la carte d’origine. Le mois courant est mis en évidence. Le calendrier présente de grandes cases colorées : vert pour les achats, rouge pour les consommations, orange pour les entretiens, bleu pour les dépannages, violet pour les révisions ou anciens nettoyages. Deux événements différents le même jour créent une case bicolore en diagonale. La modification est purement visuelle : le stock et les historiques ne sont pas recalculés.
