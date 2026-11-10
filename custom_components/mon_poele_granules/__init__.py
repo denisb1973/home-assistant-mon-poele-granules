@@ -1,5 +1,8 @@
 """Estimation des granulés consommés grâce aux heures de fonctionnement électrique."""
 from datetime import timedelta
+import csv
+import io
+import hashlib
 from pathlib import Path
 from homeassistant.components.http import StaticPathConfig
 import voluptuous as vol
@@ -99,6 +102,35 @@ class PelletManager:
         self.data["maintenances"].append({"date": date, "description": description, "next_due": next_due, "note": note})
         await self.save()
 
+    async def import_legacy_csv(self, csv_text):
+        """Import historical operations for display only; never change current stock."""
+        rows = list(csv.DictReader(io.StringIO(csv_text.lstrip("\\ufeff")), delimiter=";"))
+        if not rows:
+            raise ValueError("Le fichier CSV est vide")
+        expected = {"Saison", "Date", "Type", "Quantite", "Prix par sac", "Prix total", "Note"}
+        if not expected.issubset(set(rows[0])):
+            raise ValueError("Format CSV incompatible avec l'export Suivi Stock Pellet")
+        records = []
+        for row in rows:
+            date = (row.get("Date") or "").strip()
+            event = (row.get("Type") or "").strip()
+            if not date or not event:
+                continue
+            from datetime import date as date_type
+            date_type.fromisoformat(date)
+            def value(key):
+                raw = (row.get(key) or "").strip().replace(",", ".")
+                return float(raw) if raw else None
+            qty, unit, total = value("Quantite"), value("Prix par sac"), value("Prix total")
+            records.append({"date": date, "season": (row.get("Saison") or "").strip(),
+                "type": event, "bags": qty, "unit_price": unit,
+                "total_eur": total, "note": (row.get("Note") or "").strip()})
+        # Replace an import snapshot rather than appending: reimporting is idempotent.
+        self.data["legacy_history"] = records
+        self.data["legacy_source_hash"] = hashlib.sha256(csv_text.encode("utf-8")).hexdigest()
+        await self.save()
+        return len(records)
+
     async def start_calibration(self):
         self.data["calibration"] = {
             "start_runtime": self.data["runtime_h"], "start_energy": self.energy,
@@ -153,6 +185,8 @@ async def async_setup_entry(hass, entry):
             await get_manager().reconcile(float(call.data["sacs_reels"]), call.data.get("date", current_date()), call.data.get("note", "Inventaire"))
         async def maintain(call):
             await get_manager().maintenance(call.data["entretien"], call.data.get("date", current_date()), call.data.get("prochaine_date", ""), call.data.get("note", ""))
+        async def import_history(call):
+            await get_manager().import_legacy_csv(call.data["csv_text"])
         async def calib_start(call):
             await get_manager().start_calibration()
         async def calib_end(call):
@@ -161,6 +195,7 @@ async def async_setup_entry(hass, entry):
         hass.services.async_register(DOMAIN, "ajouter_achat", add_purchase, schema=vol.Schema({vol.Required("sacs"): nonnegative, vol.Required("montant_eur"): nonnegative, vol.Optional("date"): str, vol.Optional("note"): str}))
         hass.services.async_register(DOMAIN, "corriger_stock", adjust, schema=vol.Schema({vol.Required("sacs_reels"): nonnegative, vol.Optional("date"): str, vol.Optional("note"): str}))
         hass.services.async_register(DOMAIN, "ajouter_entretien", maintain, schema=vol.Schema({vol.Required("entretien"): str, vol.Optional("date"): str, vol.Optional("prochaine_date"): str, vol.Optional("note"): str}))
+        hass.services.async_register(DOMAIN, "importer_historique", import_history, schema=vol.Schema({vol.Required("csv_text"): str}))
         hass.services.async_register(DOMAIN, "demarrer_calibration", calib_start)
         hass.services.async_register(DOMAIN, "terminer_calibration", calib_end, schema=vol.Schema({vol.Required("sacs_consommes"): vol.All(vol.Coerce(float), vol.Range(min=0.01))}))
     return True
@@ -172,6 +207,6 @@ async def async_unload_entry(hass, entry):
         if manager:
             await manager.save()
         if not hass.data[DOMAIN]:
-            for action in ("ajouter_achat", "corriger_stock", "ajouter_entretien", "demarrer_calibration", "terminer_calibration"):
+            for action in ("ajouter_achat", "corriger_stock", "ajouter_entretien", "demarrer_calibration", "terminer_calibration", "importer_historique"):
                 hass.services.async_remove(DOMAIN, action)
     return ok
