@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.1 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.2 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -134,14 +134,15 @@ class MonPoeleGranulesCard extends HTMLElement {
 
     const totalBags=combinedPurchases.reduce((a,x)=>a+(+x.bags||0),0);
     const price=totalBags?combinedPurchases.reduce((a,x)=>a+(+x.total_eur||0),0)/totalBags:0;
-    const now=new Date(),months=Array.from({length:12},(_,i)=>new Date(now.getFullYear(),now.getMonth()-11+i,1));
+    const now=new Date(),startYear=now.getMonth()>=9?now.getFullYear():now.getFullYear()-1;
+    const months=Array.from({length:(now.getFullYear()-startYear)*12+now.getMonth()-9+1},(_,i)=>new Date(startYear,9+i,1));
     const monthly=months.map(d=>({label:d.toLocaleDateString("fr-FR",{month:"short"}),kg:Object.keys(days).filter(k=>k.startsWith(this.dayKey(d).slice(0,7))).reduce((a,k)=>a+(+days[k].kg||0),0)+Object.keys(historicalKg).filter(k=>k.startsWith(this.dayKey(d).slice(0,7))).reduce((a,k)=>a+historicalKg[k],0)}));
     const maxKg=Math.max(1,...monthly.map(x=>x.kg));
     const maxCost=Math.max(1,...monthly.map(x=>x.kg*price/15));
-    const base=162;
-    const pts=monthly.map((x,i)=>(i*60+30)+","+(base-x.kg*price/15/maxCost*125)).join(" ");
-    const bars=monthly.map((x,i)=>'<rect x="'+(i*60+17)+'" y="'+(base-x.kg/maxKg*125)+'" width="26" height="'+(x.kg/maxKg*125)+'" fill="#e74747" rx="4"/>').join("");
-    const labels=monthly.map((x,i)=>'<text x="'+(i*60+30)+'" y="185" font-size="12" fill="currentColor" text-anchor="middle">'+this.escape(x.label)+'</text>').join("");
+    const base=162,step=720/monthly.length,barWidth=Math.min(36,step*.40);
+    const pts=monthly.map((x,i)=>(i*step+step/2)+","+(base-x.kg*price/15/maxCost*125)).join(" ");
+    const bars=monthly.map((x,i)=>'<rect x="'+(i*step+step/2-barWidth/2)+'" y="'+(base-x.kg/maxKg*125)+'" width="'+barWidth+'" height="'+(x.kg/maxKg*125)+'" fill="#e74747" rx="4"/>').join("");
+    const labels=monthly.map((x,i)=>'<text x="'+(i*step+step/2)+'" y="185" font-size="14" fill="currentColor" text-anchor="middle">'+this.escape(x.label)+'</text>').join("");
     this.shadowRoot.getElementById("chart").innerHTML='<svg viewBox="0 0 720 200" style="width:100%" role="img" aria-label="Consommation mensuelle et coût estimé">'+bars+'<polyline points="'+pts+'" stroke="#55bd72" stroke-width="4" fill="none"/>'+labels+'</svg><div class="small" style="text-align:center">🔴 kg consommés · 🟢 coût estimé (€)</div><p class="small">Coût estimé à partir du prix moyen des achats enregistrés. Les données antérieures à l’installation ne sont pas disponibles.</p>';
     const types=[["prix","Prix moyen"],["entretien","Entretien"],["depannage","Dépannage"],["revision","Révision"],["achat","Achat"],["total","Total"]];
     const controls=this.shadowRoot.getElementById("metric-controls");
