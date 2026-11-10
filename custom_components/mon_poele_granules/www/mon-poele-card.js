@@ -1,7 +1,9 @@
-/* Mon Poêle à Granulés – Lovelace card v0.2.1 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.0 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
+    this._calendarDate ||= new Date(new Date().getFullYear(),new Date().getMonth(),1);
+    this._chartMetric ||= 'prix';
     if (!this.shadowRoot) {
       this.attachShadow({ mode: "open" });
       this.shadowRoot.innerHTML = String.raw`
@@ -36,16 +38,18 @@ class MonPoeleGranulesCard extends HTMLElement {
         <ha-card><div class="wrap">
           <div class="head"><div><h2>🔥 Mon Poêle à Granulés</h2><div class="small">Stock, consommation et entretien</div></div><div id="running"></div></div>
           <div class="grid" id="stats"></div>
-          <div class="section"><h3>Consommation sur 7 jours</h3><div id="chart"></div></div>
+          <div class="section"><h3>📈 ÉVOLUTION DE LA CONSOMMATION</h3><div id="chart"></div></div><div class="section"><h3>💶 PRIX MOYEN DU SAC PAR SAISON</h3><div id="metric-controls" style="display:flex;flex-wrap:wrap;gap:7px"></div><div id="seasons"></div></div>
           <div class="section"><h3>Achats et entretiens</h3><div class="actions">
             <button data-open="purchase">+ Achat</button><button data-open="stock">Corriger stock</button>
             <button data-open="maintenance">+ Entretien</button><button data-open="calibration">Calibrer</button>
           </div>
           <div class="form" id="form"></div><div id="message" class="msg" role="status"></div></div>
-          <div class="section"><h3>Historique des achats</h3><div id="purchases"></div></div>
-          <div class="section"><h3>Calendrier d'entretien</h3><div id="maintenance"></div></div>
+          <div class="section"><h3>🧾 DERNIÈRES SAISIES</h3><div id="purchases"></div></div>
+          <div class="section"><h3>📅 CALENDRIER DES AJOUTS</h3><div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0"><button id="prev-month">‹</button><strong id="month-label"></strong><button id="next-month">›</button></div><div id="maintenance"></div><div class="small" style="margin-top:12px">🟢 Achat · 🔴 Consommation · 🟠 Entretien · 🔵 Dépannage · 🟣 Révision</div></div>
         </div></ha-card>`;
       this.shadowRoot.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => this.openForm(b.dataset.open)));
+      this.shadowRoot.getElementById("prev-month").onclick=()=>this.shiftMonth(-1);
+      this.shadowRoot.getElementById("next-month").onclick=()=>this.shiftMonth(1);
     }
   }
   set hass(hass) {
@@ -90,17 +94,7 @@ class MonPoeleGranulesCard extends HTMLElement {
     ];
     this.shadowRoot.getElementById("stats").innerHTML=stats.map(([title,k,unit])=>
       `<div class="tile"><div class="label">${this.escape(title)}</div><div class="value">${this.escape(k==="next"?(this.find("next")?.state||"—"):this.number(k))} <span class="unit">${unit}</span></div></div>`).join("");
-    const days=this.find("total")?.attributes.historique_jour||{};
-    const dates=Array.from({length:7},(_,i)=>{let d=new Date();d.setDate(d.getDate()-(6-i));return d.toLocaleDateString("sv-SE");});
-    const series=dates.map(k=>({day:k,kg:Number(days[k]?.kg)||0}));
-    const max=Math.max(1,...series.map(x=>x.kg));
-    this.shadowRoot.getElementById("chart").innerHTML=`<div class="bars">${series.map(v=>`<div class="barcol"><div class="small">${v.kg.toFixed(1)}</div><div class="bar" title="${v.kg.toFixed(2)} kg" style="height:${Math.max(2,v.kg/max*83)}px"></div><div class="barlabel">${this.escape(v.day.slice(5))}</div></div>`).join("")}</div>`;
-    const purchases=this.find("stock")?.attributes.achats_recents||[];
-    this.shadowRoot.getElementById("purchases").innerHTML=purchases.length?purchases.slice(-5).reverse().map(x=>
-      `<div class="line"><b>${this.escape(x.date)} · ${this.escape(x.bags)} sacs (${this.escape(x.kg)} kg)</b><div class="small">${this.escape(x.total_eur)} € · ${this.escape(x.note||"")}</div></div>`).join(""):'<div class="small">Aucun achat enregistré</div>';
-    const maint=this.find("next")?.attributes.entretiens_recents||[];
-    this.shadowRoot.getElementById("maintenance").innerHTML=maint.length?maint.slice(-5).reverse().map(x=>
-      `<div class="line"><b>${this.escape(x.description)}</b><div class="small">Effectué : ${this.escape(x.date)} · Prochain : ${this.escape(x.next_due||"non défini")}</div></div>`).join(""):'<div class="small">Aucun entretien enregistré</div>';
+    this.renderHistory();
   }
   openForm(type){
     this._formType=type;
