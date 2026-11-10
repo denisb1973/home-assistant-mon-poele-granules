@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.0 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.1 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -47,13 +47,27 @@ class MonPoeleGranulesCard extends HTMLElement {
           <div class="section"><h3>📈 ÉVOLUTION DE LA CONSOMMATION</h3><div id="chart"></div></div><div class="section"><h3>💶 PRIX MOYEN DU SAC PAR SAISON</h3><div id="metric-controls" style="display:flex;flex-wrap:wrap;gap:7px"></div><div id="seasons"></div></div>
           <div class="section"><h3>Achats et entretiens</h3><div class="actions">
             <button data-open="purchase">+ Achat</button><button data-open="stock">Corriger stock</button>
-            <button data-open="maintenance">+ Entretien</button><button data-open="calibration">Calibrer</button>
+            <button data-open="maintenance">+ Entretien</button><button data-open="calibration">Calibrer</button><button id="legacy-import-button" type="button">Importer CSV</button><input id="legacy-import-file" type="file" accept=".csv,text/csv" style="display:none">
           </div>
           <div class="form" id="form"></div><div id="message" class="msg" role="status"></div></div>
           <div class="section"><h3>🧾 DERNIÈRES SAISIES</h3><div id="purchases"></div></div>
           <div class="section"><h3>📅 CALENDRIER DES AJOUTS</h3><div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0"><button id="prev-month">‹</button><strong id="month-label"></strong><button id="next-month">›</button></div><div id="maintenance"></div><div class="small" style="margin-top:12px">🟢 Achat · 🔴 Consommation · 🟠 Entretien · 🔵 Dépannage · 🟣 Révision</div></div>
         </div></ha-card>`;
       this.shadowRoot.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => this.openForm(b.dataset.open)));
+      this.shadowRoot.getElementById("legacy-import-button").onclick=()=>this.shadowRoot.getElementById("legacy-import-file").click();
+      this.shadowRoot.getElementById("legacy-import-file").onchange=async(event)=>{
+        const file=event.target.files?.[0];
+        if(!file)return;
+        try{
+          const csv=await file.text();
+          if(!csv.includes("Saison;Date;Type;Quantite"))throw Error("Format CSV incompatible");
+          await this.call("importer_historique",{csv_text:csv},true);
+          this.shadowRoot.getElementById("message").textContent="✅ Historique envoyé. Stock inchangé ; actualisation des graphiques après réception des nouveaux états.";
+        }catch(error){
+          this.shadowRoot.getElementById("message").textContent="⚠️ Import impossible : "+String(error.message||error);
+        }
+        event.target.value="";
+      };
       this.shadowRoot.getElementById("prev-month").onclick=()=>this.shiftMonth(-1);
       this.shadowRoot.getElementById("next-month").onclick=()=>this.shiftMonth(1);
     }
@@ -110,10 +124,18 @@ class MonPoeleGranulesCard extends HTMLElement {
     const purchases=this.find("stock")?.attributes.achats_recents||[];
     const tasks=this.find("next")?.attributes.entretiens_recents||[];
     const days=this.find("total")?.attributes.historique_jour||{};
-    const totalBags=purchases.reduce((a,x)=>a+(+x.bags||0),0);
-    const price=totalBags?purchases.reduce((a,x)=>a+(+x.total_eur||0),0)/totalBags:0;
+    const legacy=this.find("total")?.attributes.historique_importe||[];
+    const pastPurchases=legacy.filter(x=>String(x.type).toLowerCase()==="achat").map(x=>({date:x.date,bags:x.bags,kg:(Number(x.bags)||0)*15,total_eur:x.total_eur??((Number(x.unit_price)||0)*(Number(x.bags)||0)),note:x.note||"",historical:true}));
+    const pastTasks=legacy.filter(x=>!["achat","consommation"].includes(String(x.type).toLowerCase())).map(x=>({date:x.date,description:x.type==="Nettoyage"?"Entretien":x.type,note:x.type==="Nettoyage"?"Nettoyage (ancien historique)":x.note||"",next_due:"",historical:true}));
+    const historicalKg={};
+    legacy.filter(x=>String(x.type).toLowerCase()==="consommation").forEach(x=>{historicalKg[x.date]=(historicalKg[x.date]||0)+(Number(x.bags)||0)*15;});
+    const combinedPurchases=purchases.concat(pastPurchases);
+    const combinedTasks=tasks.concat(pastTasks);
+
+    const totalBags=combinedPurchases.reduce((a,x)=>a+(+x.bags||0),0);
+    const price=totalBags?combinedPurchases.reduce((a,x)=>a+(+x.total_eur||0),0)/totalBags:0;
     const now=new Date(),months=Array.from({length:12},(_,i)=>new Date(now.getFullYear(),now.getMonth()-11+i,1));
-    const monthly=months.map(d=>({label:d.toLocaleDateString("fr-FR",{month:"short"}),kg:Object.keys(days).filter(k=>k.startsWith(this.dayKey(d).slice(0,7))).reduce((a,k)=>a+(+days[k].kg||0),0)}));
+    const monthly=months.map(d=>({label:d.toLocaleDateString("fr-FR",{month:"short"}),kg:Object.keys(days).filter(k=>k.startsWith(this.dayKey(d).slice(0,7))).reduce((a,k)=>a+(+days[k].kg||0),0)+Object.keys(historicalKg).filter(k=>k.startsWith(this.dayKey(d).slice(0,7))).reduce((a,k)=>a+historicalKg[k],0)}));
     const maxKg=Math.max(1,...monthly.map(x=>x.kg));
     const maxCost=Math.max(1,...monthly.map(x=>x.kg*price/15));
     const base=162;
@@ -127,8 +149,8 @@ class MonPoeleGranulesCard extends HTMLElement {
     controls.querySelectorAll("button").forEach(b=>b.onclick=()=>{this._chartMetric=b.dataset.metric;this.renderHistory()});
     const seasons={};
     const item=k=>seasons[k]||(seasons[k]={euros:0,bags:0,achat:0,entretien:0,depannage:0,revision:0,total:0});
-    purchases.forEach(x=>{const k=this.season(x.date);if(k){const a=item(k);a.euros+=+x.total_eur||0;a.bags+=+x.bags||0;a.achat++;a.total++;}});
-    tasks.forEach(x=>{const k=this.season(x.date);if(k){const a=item(k),t=String(x.description||"").toLowerCase();a[t.includes("dépann")?"depannage":t.includes("révision")?"revision":"entretien"]++;a.total++;}});
+    combinedPurchases.forEach(x=>{const k=this.season(x.date);if(k){const a=item(k);a.euros+=+x.total_eur||0;a.bags+=+x.bags||0;a.achat++;a.total++;}});
+    combinedTasks.forEach(x=>{const k=this.season(x.date);if(k){const a=item(k),t=String(x.description||"").toLowerCase();a[t.includes("dépann")?"depannage":t.includes("révision")?"revision":"entretien"]++;a.total++;}});
     const keys=Object.keys(seasons).sort().slice(-6),metric=this._chartMetric;
     const values=keys.map(k=>metric==="prix"?(seasons[k].bags?seasons[k].euros/seasons[k].bags:0):seasons[k][metric]);
     const maximum=Math.max(1,...values);
@@ -138,17 +160,19 @@ class MonPoeleGranulesCard extends HTMLElement {
       coords.map((p,i)=>'<circle cx="'+p.x+'" cy="'+p.y+'" r="5" fill="#55bd72"/><text x="'+p.x+'" y="'+Math.max(16,p.y-12)+'" text-anchor="middle" font-size="13" fill="#55bd72">'+p.v.toLocaleString("fr-FR",{maximumFractionDigits:2})+(metric==="prix"?" €/sac":"")+'</text><text x="'+p.x+'" y="180" text-anchor="middle" fill="currentColor" font-size="12">'+this.escape(keys[i])+'</text>').join("")+'</svg>':
       '<p class="small">Les saisons apparaîtront après les premières saisies.</p>';
     const rows=[
-      ...purchases.map(x=>({date:x.date,type:"🛒 Achat",detail:x.bags+" sac(s) · "+x.total_eur+" €",note:x.note||""})),
-      ...tasks.map(x=>({date:x.date,type:"🛠 "+x.description,detail:x.next_due?"Prochain : "+x.next_due:"",note:x.note||""})),
-      ...Object.entries(days).filter(([k,v])=>(+v.kg||0)>0).map(([k,v])=>({date:k,type:"🔥 Consommation estimée",detail:(+v.kg).toFixed(2)+" kg",note:""}))
+      ...combinedPurchases.map(x=>({date:x.date,type:"🛒 Achat",detail:x.bags+" sac(s) · "+x.total_eur+" €",note:x.note||""})),
+      ...combinedTasks.map(x=>({date:x.date,type:"🛠 "+x.description,detail:x.next_due?"Prochain : "+x.next_due:"",note:x.note||""})),
+      ...Object.entries(days).filter(([k,v])=>(+v.kg||0)>0).map(([k,v])=>({date:k,type:"🔥 Consommation estimée",detail:(+v.kg).toFixed(2)+" kg",note:""})),
+      ...legacy.filter(x=>String(x.type).toLowerCase()==="consommation").map(x=>({date:x.date,type:"🔥 Consommation historique",detail:(Number(x.bags)||0)+" sac(s) · "+((Number(x.bags)||0)*15)+" kg",note:""}))
     ].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
     this.shadowRoot.getElementById("purchases").innerHTML=rows.length?rows.map(x=>'<div class="line"><b>'+this.escape(x.type)+" · "+this.escape(x.date)+'</b><div class="small">'+this.escape(x.detail)+(x.note?" · "+this.escape(x.note):"")+'</div></div>').join(""):'<div class="small">Aucune saisie pour le moment</div>';
     const d=this._calendarDate,y=d.getFullYear(),m=d.getMonth(),prefix=this.dayKey(d).slice(0,7);
     const marks={};
     const mark=(date,color,title)=>{if(String(date).slice(0,7)===prefix)(marks[date]||(marks[date]=[])).push({color,title});};
-    purchases.forEach(x=>mark(x.date,"#30aa65","Achat"));
-    tasks.forEach(x=>{const t=String(x.description||"").toLowerCase(),color=t.includes("dépann")?"#2196f3":t.includes("révision")?"#9c27b0":"#ffa726";mark(x.date,color,x.description);if(x.next_due)mark(x.next_due,color,"Prévu : "+x.description);});
+    combinedPurchases.forEach(x=>mark(x.date,"#30aa65","Achat"));
+    combinedTasks.forEach(x=>{const t=String(x.description||"").toLowerCase(),color=t.includes("dépann")?"#2196f3":t.includes("révision")?"#9c27b0":"#ffa726";mark(x.date,color,x.description);if(x.next_due)mark(x.next_due,color,"Prévu : "+x.description);});
     Object.entries(days).forEach(([date,v])=>{if((+v.kg||0)>0)mark(date,"#e74747","Consommation");});
+    Object.entries(historicalKg).forEach(([date,kg])=>{if(kg>0)mark(date,"#e74747","Consommation historique : "+kg+" kg");});
     const start=(d.getDay()+6)%7,count=new Date(y,m+1,0).getDate();
     this.shadowRoot.getElementById("month-label").textContent=d.toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
     const head=["L","M","M","J","V","S","D"].map(x=>'<div style="text-align:center;opacity:.65">'+x+'</div>').join("");
