@@ -61,8 +61,8 @@ class MonPoeleGranulesCard extends HTMLElement {
         try{
           const csv=await file.text();
           if(!csv.includes("Saison;Date;Type;Quantite"))throw Error("Format CSV incompatible");
-          await this.call("importer_historique",{csv_text:csv},true);
-          this.shadowRoot.getElementById("message").textContent="✅ Historique envoyé. Stock inchangé ; actualisation des graphiques après réception des nouveaux états.";
+          const ok=await this.call("importer_historique",{csv_text:csv},true);
+          if(ok)this.shadowRoot.getElementById("message").textContent="✅ Historique importé. Le stock réel est inchangé.";
         }catch(error){
           this.shadowRoot.getElementById("message").textContent="⚠️ Import impossible : "+String(error.message||error);
         }
@@ -203,7 +203,8 @@ class MonPoeleGranulesCard extends HTMLElement {
       await this._hass.callService("mon_poele_granules",action,data);
       msg.textContent="✅ Action enregistrée";
       if(!keepOpen)this.shadowRoot.getElementById("form").classList.remove("open");
-    }catch(err){msg.textContent="⚠️ Erreur : "+(err.message||String(err));}
+      return true;
+    }catch(err){msg.textContent="⚠️ Erreur : "+(err.message||String(err));return false;}
   }
   submit(type,form){
     const data=Object.fromEntries([...form.entries()].filter(([k,v])=>v!==""));
