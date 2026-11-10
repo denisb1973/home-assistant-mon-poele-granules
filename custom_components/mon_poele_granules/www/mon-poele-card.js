@@ -148,31 +148,24 @@ class MonPoeleGranulesCard extends HTMLElement {
           .wrap{gap:9px!important}
           @media(max-width:450px){#stats .tile{height:69px!important;padding:8px 9px!important}#stats .tile .value{font-size:20px!important}}
           @media(min-width:900px){#stats .tile{height:auto!important;min-height:58px!important}}
-        </style>
+                  /* Poêle photo-réaliste, état suivi automatiquement */
+          .stove-real{position:relative;flex:0 0 103px;width:103px;height:184px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 8px 9px rgba(0,0,0,.38))}
+          .stove-real-photo{height:100%;width:100%;object-fit:contain}
+          .stove-real-flames{position:absolute;left:43%;top:29%;width:34%;height:28%;opacity:0;pointer-events:none}
+          .stove-hero[data-active="on"] .stove-real-flames{opacity:1}
+          .stove-hero[data-active="on"] .flame-one{animation:stovePhotoFlicker 1.08s ease-in-out infinite alternate;transform-origin:50% 90%}
+          .stove-hero[data-active="on"] .flame-two{animation:stovePhotoFlicker .79s ease-in-out -.22s infinite alternate;transform-origin:55% 88%}
+          @keyframes stovePhotoFlicker{from{transform:scaleX(.82) scaleY(.88) rotate(-3deg)}to{transform:scaleX(1.04) scaleY(1.11) rotate(4deg)}}
+          @media(prefers-reduced-motion:reduce){.stove-real-flames path{animation:none!important}}
+          .stove-hero{min-height:0!important;padding:10px 12px!important;gap:12px!important}
+          .stove-details .stove-status{font-size:18px!important;margin-bottom:5px}
+          .stove-details .small{font-size:11px!important}
+          @media(max-width:450px){.stove-real{flex-basis:84px;width:84px;height:152px}.stove-hero{padding:8px!important}}
+</style>
         <ha-card><div class="wrap">
           <div class="head"><div><div class="eyebrow">TABLEAU DE BORD • GRANULÉS</div><h2>Mon Poêle à Granulés</h2><div class="small">Stock, consommation et entretien</div></div><div id="running" class="running-indicator"></div></div>
           <div class="stove-hero" id="stove-hero" data-active="unknown" aria-label="État du poêle">
-            <svg class="stove-picture" viewBox="0 0 140 175" role="img" aria-label="Poêle à granulés blanc aux panneaux latéraux blancs et façade noire">
-              <defs>
-                <linearGradient id="whiteBody" x1="0" x2="1"><stop offset="0" stop-color="#d9d7d5"/><stop offset=".25" stop-color="#fff"/><stop offset="1" stop-color="#bdbbb9"/></linearGradient>
-                <linearGradient id="darkFront" x1="0" x2="1"><stop offset="0" stop-color="#343235"/><stop offset=".6" stop-color="#19191a"/><stop offset="1" stop-color="#343436"/></linearGradient>
-                <radialGradient id="fireAura"><stop offset="0" stop-color="#ff9227" stop-opacity=".8"/><stop offset="1" stop-color="#ff9227" stop-opacity="0"/></radialGradient>
-              </defs>
-              <ellipse cx="69" cy="165" rx="56" ry="7" fill="#000" opacity=".28"/>
-              <path d="M14 20 Q17 12 29 11 L109 11 Q124 14 126 23 L126 146 Q123 162 107 165 L28 165 Q14 160 14 145Z" fill="url(#whiteBody)" stroke="#a9a8a6" stroke-width="1.5"/>
-              <path d="M15 20 Q24 10 69 10 Q117 10 125 20 L123 28 Q74 20 16 28Z" fill="#222124"/>
-              <path d="M48 27 L109 27 Q118 31 119 42 L119 128 Q118 136 107 137 L48 137Z" fill="url(#darkFront)"/>
-              <path d="M51 32 H114 M51 36 H114 M51 40 H114 M51 44 H114" stroke="#0b0b0c" stroke-width="3" opacity=".8"/>
-              <path class="stove-window" d="M60 57 H107 V111 H60Z"/>
-              <ellipse class="stove-glow" cx="83" cy="92" rx="32" ry="37" fill="url(#fireAura)"/>
-              <g class="stove-fire">
-                <path class="stove-flame-a" d="M70 107 Q58 96 70 80 Q77 70 75 64 Q92 79 87 90 Q96 80 94 76 Q106 96 94 107Z" fill="#ff6f11"/>
-                <path class="stove-flame-b" d="M76 107 Q69 96 82 84 Q82 92 88 94 Q92 88 92 86 Q99 100 89 107Z" fill="#ffd048"/>
-              </g>
-              <path d="M48 137 L119 137 L116 151 L50 151Z" fill="#f4f3f0"/>
-              <path d="M20 36 Q23 32 38 32 M20 40 Q23 37 38 37 M20 143 Q23 148 42 148 M20 148 Q24 153 42 153" stroke="#5c5b5c" stroke-width="1.4" fill="none"/>
-              <path d="M109 76 L114 76 L114 87 L109 87" fill="#0d0c0c"/>
-            </svg>
+            <div class="stove-real"><img class="stove-real-photo" alt="Poêle blanc cylindrique avec façade noire" src="data:image/webp;base64,UklGRmwLAABXRUJQVlA4WAoAAAAQAAAAawAAwQAAQUxQSJIGAAABoIXtnyG5GsTGsW3btm3btu1zZVt34eDYthUnMxPbqfrX82Sqq/7/f/16z21EQJRtJ4hzo7SkkgVXQxDqBxT+v6XUte/ya22+w+4HHnXS+VffcPNtd95z/0MP3H3bLTddd8Wl5592woF77rDVxqss06tLKSXl3qvvdOR5Nz855JOfRkyYPHPeInJMocXzZ09vjf3rh48Gv/jw1Sftu+kKPUuadF5+i2Ove/ad36YssKGWLBVrjWnrjfXKGesJWaJg8xfPmfBT5alrjt1soAL9tz7v6U9HL/Dr6zcoLpGqBJtr/Apk2jvvn8pDJ27aW3BBbHreW//O8+wZawINYgljiza4rW/Xf9YfL520ZpHD2pe9O6t9DkEk8/W2D500/OyBMbZ5amJbgyhtxd+3rhhi4COzsxpUxagTs6zyWfvKQMYYZ871Kb7mDN4ebYhxP/f06P2fMxaP+B8by3sMGA1YwjBo+kUGjomhfHKNEibLcuMkmHRXUJzGCh4rTHCy84VC02elhggLw4iBvp8f6UwOeK9TQI0vrlbyM81cUC/niXdUMSismI/k3QyNfKgxoI6oWNVnZSiIcgQJqJVSqSl4+lKQsEyO/BWRXtYEaKBAGREm6dTcnUjEKq3kxYj3O8UytZLPRAFEMH4MAtFNZ6WkM8+6ZvisrKImkjgnRpU8A1qQlrMIX4EUaTjHuGFDREoeNwTxPophiANlIBL/LfiDiHHNxLdA0nSc+osgAURWzEpcSNxniSvHz0TJmFS6v1Kj4D4oVbydhXW58SHChFBh9RWitgCRNbAU1DEL707KBUSw4wiWH5b5xLTjI3HsgZYRxtuEOsZUr7BcSB4rKhogN/uVyeqbq5UESH9vHfWXPnVJnCNl4on/6PNu9hBEjHYxotSJIPZghZZoVOOxBxHpgVAs3C5U2GorYPIJfyfIpDM09Ip5yVhloj4v3ih3jvJ+k4KhjpSXb1DHBHx+o6OBksONc7iBIlEUgGKybHLq5TxRkyQWA6MwnrUWk3qZ7UNwDJkQ75b5vhHwvlaO35Du61gZTKolBhSHYKiEx2LMkAAIRl/GcojE5JVr1TAmoGbGAxpqeurlFJR99OOBeWd9rY0J+asEnPmFojrKqgF/RagYEzwkRZLyvtaDAFhZD4KgFVDLC3SMWFeJH5J5ToRJNW6ovYNhjCB+08kbrSS6CQxJMx0T7DmjHGADfngSGyLCIZbwikBRL2cN8U8ilzlnfpkufltVX/3hBfPSsUpLncqFNgmx/oVIi+qFJuX4KADpgVEMmEoxh6zcwia5H66cl5AVG+p8fGuesMYhxIpqhpxLQ5pipLNLx33oy6Xc8GIcItx5nEomA4nmM22AogL1Sg3EROf5QwxK3jIjI/6gg2AIjp3jIH6VGlgkKjxwD+FB6Gt9Ww54N/F4ABKNuRWkXTJmic1BoMKMt+EOoMyzX+68ABwZdbQvgzKpGJcSQRfLAcZVBBARHsUs8UsIEt5aKSCXbPixh3hiO0lzDZMVJwRjD/bnpsGw4oEVwwnOZ5oYWuv2E8ProxPc0wYDS0rmjFFB55k2eTe2GLWS8XmcRhKfbwzMmr3o2j0MamXhuC+73JK9Jetf+CD1Noz+hd+jgSBee4MN2wwYLREEQzUT50wUQDgmA89+J0kAXM8pyBABPn9opIFSxaVNAbDPcMJTb+KyhETM8xII3D46vvNubCSsRSQ4X8/4aljtMol5p1NoTRH8aCy0lgMRyRrmjuH/OgmRVi58fqWYQ5+/CiT68wLUhmCoiRNiJkSp+mitDKBvRFdEMmhGSRDnCIGLc3DhjTHzgNraNjT6jsgFL2bePzM4F33Z2QVfjidAKLqPWjFDtyHwLxkhd0YhK2v8yYk+wPbHSsFXLo1EPsY5eqxrISjrvusIdlbgi9oF0VdX9bx/gcP8EHdHj3KBIbsMI0dwdsxnZ3ThvjHtmI+sc0gaN+ntg7oW+NLl4EFTHIDCf+fXlHevXKcglbWv+HBWW5HmRjdZu4v/efn0dUo6L5/b7MpKy1u6oP+41H8x3Mih1+06sKApqx1x97C/58bXFfJ358vCSb8Me/TsHZYrJJBivy2Ou+mVT0ZNne+kYhdMG/dj7aU7Ttpx1V6lQlIp919vpyMuvOf5l+96/89/R4weN77RbDUbE8aMGPHHT18NefXxu6889cCdN1iua9ZesZiI4lIJV6NXv4HLr7Tyqquvvtqqq6ywzMBe3cqManpV7SikAFZQOCC0BAAAcB4AnQEqbADCAD7BUqNMJ6SnpSrzHRDwGAlpBLIFcAfqB/QEarA8+0nAGQavSYjOaR5inyQt2v0/qeNFpGl0kC4gXSAqM9qBm3Btt7uLiqGUm3NmWQcr92aVNQhofmdqCGnTnz70qmdnyelyMWQf+RZco8QeeT04GQn5PPin/7czpK6KrrBGFS/WckTAzUO8oerA4bFlwsVwiFLWG26fcGRfmEAXWLhY+SVKt581uqqGKf6/j1w+tqxnU34SG1dZO85Tco/TVC4XRjUClGTmDkO/BjHq9BeIP1d15FthaIUXRDVaEIqMbwoJ9QaUN/heDs6OVjqyk3/32USAAP766gBKjak3Kf7uXZcjE9vlWt008p4ycUJoDvaJ+AdjWmLq2HQ1VQ/4BWIOROFuV/j8upQ+LyERGlbvrIC6W23ka6iGVqgWogR8QPlFaPRlQUmwyHHfCO7yivQqouq9t0985UVNivjjkjc1or1p/TglNYqRzEAkH29BoA3TRGLJZKWZfjNtBtQdhAKiDj441z0d5oISrCrApL7boz9tvLhqZ72J8bggFcnZyYiVgUxc7sL9qPz7sI5JjM0ENvDk5jkv9R1vdQlLdJsEnzZekhrKbQWPNrD0KnFw0JwObWtr2OooURuBjAA4yqJMTZ6Q3/xzABE//G/DOW2kTGhI7KbVxcT71qC1Dk32GTyV5wRhHE5xI85YuXVYqpWoC7L34M0W20LJFPj/jfBeOwz6SP1LRNar56A88DuRhUJakfBXhIAbNN89Op02kFaTZSL3fmhNnuJozGKg/VP3ADOgeilDy62T2lfsnee6qYrprhJscvP53mDT0/KOOqo8cMLz8UT1xUHIz8UJIKkofZyW9tioaHmWgCNjTsyIOIt8Ow05ulF2o8B3Z304yuCCVUVXchvjOK/ff5d4rgV+uoWa/7LkF/JXJYwzrmWx4cC+gWI/GN0tqJJm550/vQ1X4wZAncTBg9pPApyI0bYH+GaO0TMHBjh+EIsgnPmr/ZNq1AcI6ecCAcnGzx/oCnfGWxs1jGA1lH04cydM59hD99LLPt2VKOAk5/4JwjlhkpXEJP0wHcXezgplpiZvLW0oS0O//x7RtkgDjK958nGLhUcU3/6wgsguzL6ug5bxoIn3HywdWeJDKZiHoNKJ6hr+TobSmrLpU0YYONS45IlFkv7eHwweUMrW++DTwRHSWww6XAtYoGyt2s6aTFnXK5geCKASYn+f0AqJSWyuHwpeHvjYG52NWR9FTW150Fr/ZxSG47ZNW76IGoYHD5pVpmPGOaVncK/BheomCiMg0YBNr6iP3tatE0MlZJcIok7dRYrxwyOHAQcj+q327i8vysTshjt+LYwnTqletszwT80+/fkeKD8qAKwMYj2gFkUqD6WNbk5IlMMkT1WOxcQBdDb9Zg937cSY9CedjFAbBIuzjLHGKWtLy3qIrL3cm22RsZdYB/YOdN//qwJmHoknzLqxqwN4RTPXcZGok6RssnpRIEIkWTEo/eniFyOgjF84ykiBii7asNYptS/dZW2WQv6154/yu7hXMz8m/mFFQ2z+XBI6BDsPjpeoNuTfWCi4RSGC8zrrJDvsgAAAAA=="/><svg class="stove-real-flames" viewBox="0 0 100 100" aria-hidden="true"><defs><radialGradient id="pelletGlow"><stop stop-color="#ffda7c" stop-opacity=".8"/><stop offset="1" stop-color="#f80" stop-opacity="0"/></radialGradient></defs><ellipse cx="50" cy="55" rx="36" ry="40" fill="url(#pelletGlow)"/><path class="flame-one" d="M32 90 Q18 67 40 45 Q48 33 48 12 Q76 42 67 65 Q75 54 75 45 Q94 73 71 90 Z" fill="#ff781c"/><path class="flame-two" d="M47 90 Q35 72 52 60 Q59 50 59 42 Q72 65 65 75 Q73 68 74 61 Q83 83 64 90Z" fill="#ffe29c"/></svg></div>
             <div class="stove-details"><div id="stove-status" class="stove-status unknown">État inconnu</div><div class="small" id="stove-subtitle">Animation synchronisée avec le capteur de fonctionnement.</div></div>
           </div>
           <div class="grid" id="stats"></div>
