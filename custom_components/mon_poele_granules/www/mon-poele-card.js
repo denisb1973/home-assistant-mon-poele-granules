@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.5 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.6 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -10,7 +10,24 @@ class MonPoeleGranulesCard extends HTMLElement {
         <style>
           :host { display:block; color:var(--primary-text-color); font:inherit }
           .wrap{padding:18px;background:var(--ha-card-background,var(--card-background-color,#1c1c1c));border-radius:var(--ha-card-border-radius,16px)}
-          .head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}
+          .head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+          .stove-hero{display:flex;align-items:center;justify-content:center;gap:16px;padding:13px;min-height:166px;border:1px solid rgba(255,255,255,.10);border-radius:16px;background:linear-gradient(125deg,rgba(23,39,60,.88),rgba(23,15,40,.7));margin:0 0 14px;overflow:hidden}
+          .stove-picture{height:164px;width:135px;flex:0 0 135px;filter:drop-shadow(0 7px 8px rgba(0,0,0,.33))}
+          .stove-hero .stove-side{fill:#f3f0ec}.stove-hero .stove-front{fill:#262526}
+          .stove-window{fill:#100f10;stroke:#575154;stroke-width:3}
+          .stove-fire{opacity:0;transition:opacity .35s ease}
+          .stove-hero[data-active="on"] .stove-fire{opacity:1}
+          .stove-hero[data-active="on"] .stove-flame-a{animation:stoveFlicker 1.17s ease-in-out infinite alternate;transform-origin:70px 104px}
+          .stove-hero[data-active="on"] .stove-flame-b{animation:stoveFlicker .87s ease-in-out -.4s infinite alternate;transform-origin:70px 104px}
+          .stove-hero[data-active="on"] .stove-glow{opacity:.9}
+          .stove-glow{opacity:0;transition:opacity .35s ease}
+          @keyframes stoveFlicker{from{transform:scale(.91,1.0) rotate(-3deg)}to{transform:scale(1.06,1.15) rotate(4deg)}}
+          @media(prefers-reduced-motion:reduce){.stove-flame-a,.stove-flame-b{animation:none!important}}
+          .stove-status{font-size:19px;font-weight:700;margin-bottom:9px}
+          .stove-status.on{color:#ff9a29}.stove-status.off{color:var(--secondary-text-color)}
+          .stove-status.unknown{color:var(--warning-color,#f3b449)}
+          .stove-details{min-width:0}.stove-details .small{font-size:13px;line-height:1.55}
+          @media(max-width:390px){.stove-picture{width:105px;height:135px;flex-basis:105px}.stove-hero{gap:9px;padding:10px;min-height:145px}.stove-status{font-size:16px}}
           h2{font-size:21px;margin:0;font-weight:650} h3{font-size:16px;margin:4px 0 12px}
           .small{color:var(--secondary-text-color);font-size:12px}
           .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
@@ -54,6 +71,30 @@ class MonPoeleGranulesCard extends HTMLElement {
         </style>
         <ha-card><div class="wrap">
           <div class="head"><div><h2>🔥 Mon Poêle à Granulés</h2><div class="small">Stock, consommation et entretien</div></div><div id="running"></div></div>
+          <div class="stove-hero" id="stove-hero" data-active="unknown" aria-label="État du poêle">
+            <svg class="stove-picture" viewBox="0 0 140 175" role="img" aria-label="Poêle à granulés blanc aux panneaux latéraux blancs et façade noire">
+              <defs>
+                <linearGradient id="whiteBody" x1="0" x2="1"><stop offset="0" stop-color="#d9d7d5"/><stop offset=".25" stop-color="#fff"/><stop offset="1" stop-color="#bdbbb9"/></linearGradient>
+                <linearGradient id="darkFront" x1="0" x2="1"><stop offset="0" stop-color="#343235"/><stop offset=".6" stop-color="#19191a"/><stop offset="1" stop-color="#343436"/></linearGradient>
+                <radialGradient id="fireAura"><stop offset="0" stop-color="#ff9227" stop-opacity=".8"/><stop offset="1" stop-color="#ff9227" stop-opacity="0"/></radialGradient>
+              </defs>
+              <ellipse cx="69" cy="165" rx="56" ry="7" fill="#000" opacity=".28"/>
+              <path d="M14 20 Q17 12 29 11 L109 11 Q124 14 126 23 L126 146 Q123 162 107 165 L28 165 Q14 160 14 145Z" fill="url(#whiteBody)" stroke="#a9a8a6" stroke-width="1.5"/>
+              <path d="M15 20 Q24 10 69 10 Q117 10 125 20 L123 28 Q74 20 16 28Z" fill="#222124"/>
+              <path d="M48 27 L109 27 Q118 31 119 42 L119 128 Q118 136 107 137 L48 137Z" fill="url(#darkFront)"/>
+              <path d="M51 32 H114 M51 36 H114 M51 40 H114 M51 44 H114" stroke="#0b0b0c" stroke-width="3" opacity=".8"/>
+              <path class="stove-window" d="M60 57 H107 V111 H60Z"/>
+              <ellipse class="stove-glow" cx="83" cy="92" rx="32" ry="37" fill="url(#fireAura)"/>
+              <g class="stove-fire">
+                <path class="stove-flame-a" d="M70 107 Q58 96 70 80 Q77 70 75 64 Q92 79 87 90 Q96 80 94 76 Q106 96 94 107Z" fill="#ff6f11"/>
+                <path class="stove-flame-b" d="M76 107 Q69 96 82 84 Q82 92 88 94 Q92 88 92 86 Q99 100 89 107Z" fill="#ffd048"/>
+              </g>
+              <path d="M48 137 L119 137 L116 151 L50 151Z" fill="#f4f3f0"/>
+              <path d="M20 36 Q23 32 38 32 M20 40 Q23 37 38 37 M20 143 Q23 148 42 148 M20 148 Q24 153 42 153" stroke="#5c5b5c" stroke-width="1.4" fill="none"/>
+              <path d="M109 76 L114 76 L114 87 L109 87" fill="#0d0c0c"/>
+            </svg>
+            <div class="stove-details"><div id="stove-status" class="stove-status unknown">État inconnu</div><div class="small" id="stove-subtitle">Animation synchronisée avec le capteur de fonctionnement.</div></div>
+          </div>
           <div class="grid" id="stats"></div>
           <div class="section"><h3>📈 ÉVOLUTION DE LA CONSOMMATION</h3><div id="chart"></div></div><div class="section"><h3>💶 PRIX MOYEN DU SAC PAR SAISON</h3><div id="metric-controls" style="display:flex;flex-wrap:wrap;gap:7px"></div><div id="seasons"></div></div>
           <div class="section"><h3>Achats et entretiens</h3><div class="actions">
@@ -132,8 +173,18 @@ class MonPoeleGranulesCard extends HTMLElement {
   escape(t){return String(t??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
   render(){
     const state=this.find("running");
+    const isOn=state?.state==="Oui",isOff=state?.state==="Non";
     this.shadowRoot.getElementById("running").textContent =
-      state?.state==="Oui"?"🟢 En marche":state?.state==="Non"?"⚪ Éteint":"⚠️ État inconnu";
+      isOn?"🟢 En marche":isOff?"⚪ Éteint":"⚠️ État inconnu";
+    const hero=this.shadowRoot.getElementById("stove-hero");
+    hero.dataset.active=isOn?"on":isOff?"off":"unknown";
+    hero.setAttribute("aria-label",isOn?"Poêle en marche, flamme animée":isOff?"Poêle éteint, sans flamme":"État du poêle inconnu");
+    const status=this.shadowRoot.getElementById("stove-status");
+    status.textContent=isOn?"🔥 Poêle en marche":isOff?"Poêle éteint":"État inconnu";
+    status.className="stove-status "+(isOn?"on":isOff?"off":"unknown");
+    this.shadowRoot.getElementById("stove-subtitle").textContent=isOn?
+      "Flamme animée • consommation suivie automatiquement":isOff?
+      "Flamme éteinte • poêle à l'arrêt":"En attente du capteur de fonctionnement";
     const stats=[
       ["Stock","stock","kg"],["Sacs disponibles","sacs","sacs"],
       ["Aujourd'hui","today","kg"],["Ce mois","month","kg"],
