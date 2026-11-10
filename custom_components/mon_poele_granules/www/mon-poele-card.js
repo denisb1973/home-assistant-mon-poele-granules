@@ -205,9 +205,10 @@ class MonPoeleGranulesCard extends HTMLElement {
         colors.length===2?"linear-gradient(135deg,"+colors[0]+" 0%, "+colors[0]+" 49.8%, "+colors[1]+" 50.2%, "+colors[1]+" 100%)":
         "conic-gradient("+colors.map((c,j)=>c+" "+(j*100/colors.length)+"% "+((j+1)*100/colors.length)+"%").join(",")+")";
       const current=date===this.dayKey(new Date());
-      return '<div title="'+this.escape(mk.map(x=>x.title).join(" ; "))+'" aria-label="'+this.escape(date+" "+mk.map(x=>x.title).join(", "))+'" style="box-sizing:border-box;display:flex;align-items:center;justify-content:center;min-height:clamp(56px,10vw,92px);border-radius:8px;background:'+background+';font-size:clamp(15px,2.6vw,22px);font-weight:'+(mk.length?700:400)+';color:'+(mk.length?"#fff":"inherit")+';'+(current?"outline:2px solid var(--primary-color,#ffa726);outline-offset:-2px;":"")+'">'+(i+1)+'</div>';
+      return '<button type="button" data-date="'+date+'" title="'+this.escape(mk.map(x=>x.title).join(" ; "))+'" aria-label="'+this.escape(date+" "+mk.map(x=>x.title).join(", "))+'" style="box-sizing:border-box;display:flex;align-items:center;justify-content:center;min-height:clamp(56px,10vw,92px);border-radius:8px;background:'+background+';font-size:clamp(15px,2.6vw,22px);font-weight:'+(mk.length?700:400)+';color:'+(mk.length?"#fff":"inherit")+';'+(current?"outline:2px solid var(--primary-color,#ffa726);outline-offset:-2px;":"")+'">'+(i+1)+'</button>';
     }).join("");
     this.shadowRoot.getElementById("maintenance").innerHTML='<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px">'+head+blanks+cells+'</div>';
+    this.showCalendarChoices();
   }
   openForm(type){
     this._formType=type;
