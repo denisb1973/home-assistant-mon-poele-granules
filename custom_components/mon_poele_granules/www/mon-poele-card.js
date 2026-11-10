@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.18 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.19 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -253,6 +253,81 @@ class MonPoeleGranulesCard extends HTMLElement {
             .dashboard-nav .nav-icon svg{width:17px;height:17px}
           }
           #chart svg{height:auto;min-height:0!important}
+
+          /* V0.3.19 — Accueil immersif sans changement de structure HTML/JS.
+             Les deux composants existants occupent volontairement la même zone CSS Grid. */
+          .wrap[data-view="accueil"]{grid-template-columns:minmax(0,1fr)!important;align-content:start}
+          .wrap[data-view="accueil"] > .head{grid-row:1!important;grid-column:1!important}
+          .wrap[data-view="accueil"] > .dashboard-nav{grid-row:2!important;grid-column:1!important}
+          .wrap[data-view="accueil"] > .stove-hero{
+            grid-row:3!important;grid-column:1!important;
+            align-self:stretch!important;justify-self:stretch!important;
+            z-index:0!important;position:relative!important;
+            box-sizing:border-box!important;
+            width:100%!important;height:100%!important;
+            min-height:clamp(660px,calc(100dvh - 195px),910px)!important;
+            margin:0!important;padding:0!important;gap:0!important;
+            border:1px solid rgba(213,229,249,.19)!important;
+            border-radius:17px!important;box-shadow:none!important;
+            background:#1d2937!important;overflow:hidden!important;
+          }
+          .wrap[data-view="accueil"] > .stove-hero > .room-scene{
+            position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+          }
+          .wrap[data-view="accueil"] > .stove-hero::after{
+            content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
+            background:linear-gradient(180deg,rgba(9,17,28,.03) 0%,rgba(9,17,28,.02) 35%,rgba(9,17,28,.12) 53%,rgba(7,15,28,.5) 100%);
+          }
+          .wrap[data-view="accueil"] > #stats{
+            grid-row:3!important;grid-column:1!important;
+            position:relative!important;z-index:2!important;
+            align-self:end!important;justify-self:stretch!important;
+            box-sizing:border-box!important;margin:0!important;
+            padding:clamp(10px,1.5vw,19px)!important;
+            grid-template-columns:repeat(4,minmax(0,1fr))!important;
+            gap:clamp(6px,1vw,10px)!important;
+          }
+          .wrap[data-view="accueil"] > #stats .tile{
+            min-width:0!important;height:clamp(64px,6.8vw,78px)!important;
+            padding:9px 11px!important;border-radius:13px!important;
+            background:rgba(18,26,39,.34)!important;
+            border:1px solid rgba(230,240,252,.36)!important;
+            box-shadow:inset 0 1px 0 rgba(255,255,255,.11),0 3px 10px rgba(0,0,0,.14)!important;
+            -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+            justify-content:center!important;gap:5px!important;
+          }
+          .wrap[data-view="accueil"] > #stats .tile-stock{
+            background:rgba(14,79,55,.4)!important;
+            border-color:rgba(110,226,168,.53)!important;
+          }
+          .wrap[data-view="accueil"] > #stats .tile-next{border-color:rgba(251,182,89,.53)!important}
+          .wrap[data-view="accueil"] > #stats .tile .label{
+            color:#f3f7fb!important;font-size:clamp(10px,1.05vw,13px)!important
+          }
+          .wrap[data-view="accueil"] > #stats .tile .value{
+            color:#fff!important;font-size:clamp(20px,2.2vw,27px)!important;margin:0!important;
+            text-shadow:0 1px 4px rgba(0,0,0,.48)
+          }
+          .wrap[data-view="accueil"] > #stats .tile .unit{color:#e9f0fa!important}
+          .wrap[data-view="accueil"] > #stats .tile-icon{font-size:15px!important}
+          @media(max-width:699px){
+            .wrap[data-view="accueil"] > .stove-hero{
+              min-height:clamp(740px,calc(100dvh - 150px),1050px)!important;
+            }
+            .wrap[data-view="accueil"] > #stats{
+              grid-template-columns:repeat(2,minmax(0,1fr))!important;
+              padding:9px!important;gap:7px!important
+            }
+            .wrap[data-view="accueil"] > #stats .tile{height:66px!important;padding:7px 9px!important;gap:3px!important}
+            .wrap[data-view="accueil"] > #stats .tile .label{font-size:11px!important}
+            .wrap[data-view="accueil"] > #stats .tile .value{font-size:21px!important}
+            .wrap[data-view="accueil"] > .stove-hero::after{
+              background:linear-gradient(180deg,transparent 0%,rgba(9,16,28,.03) 24%,rgba(9,16,28,.20) 44%,rgba(9,16,28,.64) 100%)
+            }
+          }
+          @media(prefers-reduced-transparency:reduce){
+            .wrap[data-view="accueil"] > #stats .tile{background:rgba(16,26,39,.82)!important}
+          }
 </style>
         <ha-card><div class="wrap">
           <div class="head"><h2>Mon Poêle à Granulés</h2><div id="running" class="running-indicator"></div></div>
