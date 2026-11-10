@@ -1,5 +1,7 @@
 """Estimation des granulés consommés grâce aux heures de fonctionnement électrique."""
 from datetime import timedelta
+from pathlib import Path
+from homeassistant.components.http import StaticPathConfig
 import voluptuous as vol
 from homeassistant.core import callback
 from homeassistant.helpers.storage import Store
@@ -128,6 +130,12 @@ class PelletManager:
         await self.save()
 
 async def async_setup_entry(hass, entry):
+    if not hass.data.get('_mon_poele_granules_card_registered'):
+        card_path = Path(__file__).parent / 'www' / 'mon-poele-card.js'
+        await hass.http.async_register_static_paths([
+            StaticPathConfig('/mon_poele_granules/mon-poele-card.js', str(card_path), False)
+        ])
+        hass.data['_mon_poele_granules_card_registered'] = True
     manager = PelletManager(hass, entry)
     await manager.load()
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = manager
