@@ -51,7 +51,7 @@ class MonPoeleGranulesCard extends HTMLElement {
           </div>
           <div class="form" id="form"></div><div id="message" class="msg" role="status"></div></div>
           <div class="section"><h3>🧾 DERNIÈRES SAISIES</h3><div id="purchases"></div></div>
-          <div class="section"><h3>📅 CALENDRIER DES AJOUTS</h3><div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0"><button id="prev-month">‹</button><strong id="month-label"></strong><button id="next-month">›</button></div><div id="maintenance"></div><div class="small" style="margin-top:12px">🟢 Achat · 🔴 Consommation · 🟠 Entretien · 🔵 Dépannage · 🟣 Révision</div></div>
+          <div class="section"><h3>📅 CALENDRIER DES AJOUTS</h3><div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0"><button id="prev-month">‹</button><strong id="month-label"></strong><button id="next-month">›</button></div><div id="maintenance"></div><div class="small" style="margin-top:12px">🟢 Achat · 🔴 Consommation · 🟠 Entretien · 🔵 Dépannage · 🟣 Révision · 🟣 Nettoyage</div></div>
         </div></ha-card>`;
       this.shadowRoot.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => this.openForm(b.dataset.open)));
       this.shadowRoot.getElementById("legacy-import-button").onclick=()=>this.shadowRoot.getElementById("legacy-import-file").click();
@@ -178,7 +178,16 @@ class MonPoeleGranulesCard extends HTMLElement {
     this.shadowRoot.getElementById("month-label").textContent=d.toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
     const head=["L","M","M","J","V","S","D"].map(x=>'<div style="text-align:center;opacity:.65">'+x+'</div>').join("");
     const blanks=Array.from({length:start},()=>'<div></div>').join("");
-    const cells=Array.from({length:count},(_,i)=>{const date=this.dayKey(new Date(y,m,i+1)),mk=marks[date]||[];return '<div title="'+this.escape(mk.map(x=>x.title).join(" ; "))+'" style="text-align:center;border-radius:7px;background:var(--secondary-background-color,rgba(120,120,120,.13));min-height:43px;padding:8px 2px">'+(i+1)+'<div style="display:flex;gap:3px;justify-content:center;margin-top:5px">'+mk.map(x=>'<i style="width:7px;height:7px;border-radius:50%;background:'+x.color+'"></i>').join("")+'</div></div>';}).join("");
+    const cells=Array.from({length:count},(_,i)=>{
+      const date=this.dayKey(new Date(y,m,i+1)),mk=marks[date]||[];
+      const colors=[...new Set(mk.map(x=>x.color))];
+      const background=colors.length===0?"var(--secondary-background-color,rgba(120,120,120,.13))":
+        colors.length===1?colors[0]:
+        colors.length===2?"linear-gradient(135deg,"+colors[0]+" 0%, "+colors[0]+" 49.8%, "+colors[1]+" 50.2%, "+colors[1]+" 100%)":
+        "conic-gradient("+colors.map((c,j)=>c+" "+(j*100/colors.length)+"% "+((j+1)*100/colors.length)+"%").join(",")+")";
+      const current=date===this.dayKey(new Date());
+      return '<div title="'+this.escape(mk.map(x=>x.title).join(" ; "))+'" aria-label="'+this.escape(date+" "+mk.map(x=>x.title).join(", "))+'" style="box-sizing:border-box;display:flex;align-items:center;justify-content:center;min-height:clamp(56px,10vw,92px);border-radius:8px;background:'+background+';font-size:clamp(15px,2.6vw,22px);font-weight:'+(mk.length?700:400)+';color:'+(mk.length?"#fff":"inherit")+';'+(current?"outline:2px solid var(--primary-color,#ffa726);outline-offset:-2px;":"")+'">'+(i+1)+'</div>';
+    }).join("");
     this.shadowRoot.getElementById("maintenance").innerHTML='<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px">'+head+blanks+cells+'</div>';
   }
   openForm(type){
