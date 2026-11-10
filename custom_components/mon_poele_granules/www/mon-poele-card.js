@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.3 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.4 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -35,7 +35,14 @@ class MonPoeleGranulesCard extends HTMLElement {
           select{box-sizing:border-box;width:100%;margin-top:4px;padding:9px;border-radius:7px;border:1px solid var(--divider-color,#777);color:var(--primary-text-color);background:var(--primary-background-color,#222);font:inherit}
           .section h3{font-size:15px;letter-spacing:.03em}
           .section svg{display:block;margin:8px auto}
-          #maintenance [title]{cursor:help}
+          #maintenance [title]{cursor:pointer}
+          #maintenance button[data-date]{border:0;width:100%;padding:0;font:inherit;cursor:pointer}
+          #maintenance button[data-date]:focus-visible{outline:3px solid var(--primary-color,#ffa726)}
+          .calendar-choice{margin:14px 0;padding:13px;border:1px solid var(--divider-color,#555);border-radius:12px;background:var(--secondary-background-color,rgba(130,130,130,.12))}
+          .calendar-choice[hidden]{display:none}
+          .calendar-choice .date-title{font-weight:700;margin-bottom:12px}
+          .calendar-choice .actions button{flex:1;min-width:120px;padding:12px 8px}
+          #form{scroll-margin-top:110px}
           #metric-controls button{font-weight:650;padding:9px 13px}
           @media(max-width:520px){.wrap{padding:12px}.section{margin-top:24px}.section svg{min-height:120px}}
           @media(min-width:680px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
@@ -46,12 +53,12 @@ class MonPoeleGranulesCard extends HTMLElement {
           <div class="grid" id="stats"></div>
           <div class="section"><h3>📈 ÉVOLUTION DE LA CONSOMMATION</h3><div id="chart"></div></div><div class="section"><h3>💶 PRIX MOYEN DU SAC PAR SAISON</h3><div id="metric-controls" style="display:flex;flex-wrap:wrap;gap:7px"></div><div id="seasons"></div></div>
           <div class="section"><h3>Achats et entretiens</h3><div class="actions">
-            <button data-open="purchase">+ Achat</button><button data-open="stock">Corriger stock</button>
-            <button data-open="maintenance">+ Entretien</button><button data-open="calibration">Calibrer</button><button id="legacy-import-button" type="button">Importer CSV</button><input id="legacy-import-file" type="file" accept=".csv,text/csv" style="display:none">
+            <button data-open="stock">Corriger stock</button>
+            <button data-open="calibration">Calibrer</button><button id="legacy-import-button" type="button">Importer CSV</button><input id="legacy-import-file" type="file" accept=".csv,text/csv" style="display:none">
           </div>
-          <div class="form" id="form"></div><div id="message" class="msg" role="status"></div></div>
+          <div id="message" class="msg" role="status"></div></div>
           <div class="section"><h3>🧾 DERNIÈRES SAISIES</h3><div id="purchases"></div></div>
-          <div class="section"><h3>📅 CALENDRIER DES AJOUTS</h3><div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0"><button id="prev-month">‹</button><strong id="month-label"></strong><button id="next-month">›</button></div><div id="maintenance"></div><div class="small" style="margin-top:12px">🟢 Achat · 🔴 Consommation · 🟠 Entretien · 🔵 Dépannage · 🟣 Révision · 🟣 Nettoyage</div></div>
+          <div class="section"><h3>📅 CALENDRIER DES AJOUTS</h3><div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0"><button id="prev-month">‹</button><strong id="month-label"></strong><button id="next-month">›</button></div><div id="maintenance"></div><div id="calendar-choice" class="calendar-choice" hidden></div><div class="form" id="form"></div><div class="small" style="margin-top:12px">🟢 Achat · 🔴 Consommation · 🟠 Entretien · 🔵 Dépannage · 🟣 Révision · 🟣 Nettoyage</div></div>
         </div></ha-card>`;
       this.shadowRoot.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => this.openForm(b.dataset.open)));
       this.shadowRoot.getElementById("legacy-import-button").onclick=()=>this.shadowRoot.getElementById("legacy-import-file").click();
