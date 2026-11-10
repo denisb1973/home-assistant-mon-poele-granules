@@ -210,12 +210,32 @@ class MonPoeleGranulesCard extends HTMLElement {
     this.shadowRoot.getElementById("maintenance").innerHTML='<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px">'+head+blanks+cells+'</div>';
     this.showCalendarChoices();
   }
-  openForm(type){
+
+  selectCalendarDay(date){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+    this._selectedCalendarDay=date;
+    this.showCalendarChoices();
+    this.shadowRoot.getElementById("calendar-choice").scrollIntoView({behavior:"smooth",block:"nearest"});
+  }
+  showCalendarChoices(){
+    const panel=this.shadowRoot.getElementById("calendar-choice");
+    if(!panel)return;
+    if(!this._selectedCalendarDay){panel.hidden=true;panel.innerHTML="";return;}
+    const [year,month,day]=this._selectedCalendarDay.split("-").map(Number);
+    const formatted=new Date(year,month-1,day).toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+    panel.hidden=false;
+    panel.innerHTML='<div class="date-title">📅 '+this.escape(formatted)+'</div>'+
+      '<div class="small" style="margin-bottom:10px">Que souhaites-tu enregistrer ce jour-là ?</div>'+
+      '<div class="actions"><button type="button" data-calendar-action="purchase">🛒 Ajouter un achat</button>'+
+      '<button type="button" data-calendar-action="maintenance">🛠️ Ajouter une intervention</button>'+
+      '<button type="button" data-calendar-action="close">Annuler</button></div>';
+  }
+  openForm(type,chosenDate){
     this._formType=type;
     const el=this.shadowRoot.getElementById("form");
     const field=(name,label,inputType="text",value="",required=true)=>
       `<label>${label}<input name="${name}" type="${inputType}" value="${this.escape(value)}" ${required?"required":""} ${inputType==="number"?'min="0" step="any"':""}></label>`;
-    const today=new Date().toLocaleDateString("sv-SE");
+    const today=chosenDate||this.dayKey(new Date());
     let form="";
     if(type==="purchase")form=field("sacs","Nombre de sacs","number","1")+field("montant_eur","Montant total (€)","number","0")+field("date","Date","date",today)+field("note","Note","text","",false);
     else if(type==="stock")form=field("sacs_reels","Stock réel (nombre de sacs)","number",this.number("sacs"))+field("note","Motif","text","Inventaire",false);
@@ -223,6 +243,7 @@ class MonPoeleGranulesCard extends HTMLElement {
     else form='<p class="small">Démarre une calibration, puis termine-la après avoir consommé une quantité connue de sacs. Une correction du stock sera appliquée.</p>'+field("sacs_consommes","Sacs consommés depuis le début","number","1");
     el.innerHTML=`<h3>${{purchase:"Ajouter un achat",stock:"Corriger le stock",maintenance:"Enregistrer un entretien",calibration:"Calibration"}[type]}</h3><form id="pellet-form"><div class="fields">${form}</div><div class="row" style="margin-top:12px">${type==="calibration"?'<button type="button" id="start">Démarrer la calibration</button>':''}<button class="primary" type="submit">${type==="calibration"?"Terminer la calibration":"Enregistrer"}</button><button type="button" id="cancel">Annuler</button></div></form>`;
     el.classList.add("open");
+    el.scrollIntoView({behavior:"smooth",block:"nearest"});
     el.querySelector("#cancel").onclick=()=>el.classList.remove("open");
     el.querySelector("#pellet-form").onsubmit=e=>{e.preventDefault();this.submit(type,new FormData(e.target));};
     if(type==="calibration")el.querySelector("#start").onclick=()=>this.call("demarrer_calibration",{},true);
