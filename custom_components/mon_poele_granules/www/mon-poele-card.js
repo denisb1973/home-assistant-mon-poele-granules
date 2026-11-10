@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.14 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.15 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -199,7 +199,7 @@ class MonPoeleGranulesCard extends HTMLElement {
           /* v0.3.14: onglets réels (mobile et PC) */
           .wrap[data-view]{grid-template-columns:minmax(0,1fr)!important}
           .wrap[data-view] > *{grid-column:auto!important;grid-row:auto!important}
-          .dashboard-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding:5px;background:rgba(10,18,34,.72);border:1px solid rgba(155,177,209,.18);border-radius:15px;min-width:0}
+          .dashboard-nav{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px;padding:5px;background:rgba(10,18,34,.72);border:1px solid rgba(155,177,209,.18);border-radius:15px;min-width:0}
           .dashboard-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;padding:8px 2px;border:0;border-radius:11px;font-size:10px;line-height:1.25;white-space:normal;color:#afc0d7;background:transparent;transition:background .15s ease,color .15s ease}
           .dashboard-nav button .nav-icon{font-size:19px;line-height:1}
           .dashboard-nav button[aria-current="page"]{background:linear-gradient(140deg,#6c2a95,#44205d);color:#fff;font-weight:750;box-shadow:0 3px 12px rgba(0,0,0,.18)}
@@ -208,19 +208,37 @@ class MonPoeleGranulesCard extends HTMLElement {
           .wrap[data-view="accueil"] > .stove-hero{display:flex!important}
           .wrap[data-view="accueil"] > #stats{display:grid!important}
           .wrap[data-view="consommation"] > .section-chart{display:block!important}
-          .wrap[data-view="historique"] > .section-history,.wrap[data-view="historique"] > .section-calendar{display:block!important}
+          .wrap[data-view="historique"] > .section-history{display:block!important}
+          .wrap[data-view="calendrier"] > .section-calendar{display:block!important}
           .wrap[data-view="comparaison"] > .section-seasons{display:block!important}
           .wrap[data-view="parametres"] > .section-tools{display:block!important}
           .wrap[data-view] > .head,.wrap[data-view] > .dashboard-nav{grid-column:1/-1!important}
           @media(min-width:680px){.dashboard-nav button{font-size:13px;flex-direction:row;gap:8px;padding:12px 8px}.dashboard-nav button .nav-icon{font-size:20px}}
           @media(max-width:380px){.dashboard-nav{gap:3px;padding:3px}.dashboard-nav button{font-size:9px}.dashboard-nav button .nav-icon{font-size:17px}}
+
+          /* v0.3.15 — titre compact et onglet calendrier distinct */
+          .wrap[data-view] > .head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;min-height:0!important;margin:0!important;padding:8px 12px!important;border-radius:12px!important}
+          .wrap[data-view] > .head h2{font-size:clamp(15px,2.5vw,20px)!important;font-weight:700!important;line-height:1.2!important;margin:0!important;letter-spacing:0!important}
+          .wrap[data-view] > .head .running-indicator{padding:6px 9px!important;font-size:12px!important;flex:0 0 auto!important;white-space:nowrap!important}
+          @media(max-width:520px){
+            .dashboard-nav{grid-template-columns:repeat(6,minmax(0,1fr));gap:2px;padding:3px}
+            .dashboard-nav button{font-size:9px;padding:8px 1px;gap:4px}
+            .dashboard-nav button .nav-icon{font-size:17px}
+          }
+          @media(max-width:380px){
+            .dashboard-nav{grid-template-columns:repeat(3,minmax(0,1fr))}
+            .dashboard-nav button{font-size:11px;flex-direction:row;gap:5px}
+            .wrap[data-view] > .head h2{font-size:15px!important}
+            .wrap[data-view] > .head .running-indicator{font-size:11px!important;padding:5px 7px!important}
+          }
 </style>
         <ha-card><div class="wrap">
-          <div class="head"><div><div class="eyebrow">TABLEAU DE BORD • GRANULÉS</div><h2>Mon Poêle à Granulés</h2><div class="small">Stock, consommation et entretien</div></div><div id="running" class="running-indicator"></div></div>
+          <div class="head"><h2>Mon Poêle à Granulés</h2><div id="running" class="running-indicator"></div></div>
           <nav class="dashboard-nav" aria-label="Navigation du poêle">
             <button type="button" data-view-button="accueil" aria-current="page"><span class="nav-icon" aria-hidden="true">⌂</span><span>Accueil</span></button>
             <button type="button" data-view-button="consommation"><span class="nav-icon" aria-hidden="true">▥</span><span>Conso.</span></button>
             <button type="button" data-view-button="historique"><span class="nav-icon" aria-hidden="true">▦</span><span>Historique</span></button>
+            <button type="button" data-view-button="calendrier"><span class="nav-icon" aria-hidden="true">▣</span><span>Calendrier</span></button>
             <button type="button" data-view-button="comparaison"><span class="nav-icon" aria-hidden="true">⌁</span><span>Comparaison</span></button>
             <button type="button" data-view-button="parametres"><span class="nav-icon" aria-hidden="true">⚙</span><span>Réglages</span></button>
           </nav>
@@ -296,7 +314,7 @@ class MonPoeleGranulesCard extends HTMLElement {
     }
   }
   setView(name){
-    const allowed=["accueil","consommation","historique","comparaison","parametres"];
+    const allowed=["accueil","consommation","historique","calendrier","comparaison","parametres"];
     this._activeView=allowed.includes(name)?name:"accueil";
     if(!this.shadowRoot)return;
     const wrap=this.shadowRoot.querySelector(".wrap");
