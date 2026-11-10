@@ -77,6 +77,18 @@ class MonPoeleGranulesCard extends HTMLElement {
       };
       this.shadowRoot.getElementById("prev-month").onclick=()=>this.shiftMonth(-1);
       this.shadowRoot.getElementById("next-month").onclick=()=>this.shiftMonth(1);
+      this.shadowRoot.getElementById("maintenance").addEventListener("click",e=>{
+        const button=e.target.closest("button[data-date]");
+        if(button)this.selectCalendarDay(button.dataset.date);
+      });
+      this.shadowRoot.getElementById("calendar-choice").addEventListener("click",e=>{
+        const button=e.target.closest("button[data-calendar-action]");
+        if(!button)return;
+        if(button.dataset.calendarAction==="close"){
+          this._selectedCalendarDay=null;
+          this.showCalendarChoices();
+        }else this.openForm(button.dataset.calendarAction,this._selectedCalendarDay);
+      });
     }
   }
   set hass(hass) {
