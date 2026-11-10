@@ -4,7 +4,7 @@ class MonPoeleGranulesCard extends HTMLElement {
     this.config = config || {};
     if (!this.shadowRoot) {
       this.attachShadow({ mode: "open" });
-      this.shadowRoot.innerHTML = String.raw\`
+      this.shadowRoot.innerHTML = String.raw`
         <style>
           :host { display:block; color:var(--primary-text-color); font:inherit }
           .wrap{padding:18px;background:var(--ha-card-background,var(--card-background-color,#1c1c1c));border-radius:var(--ha-card-border-radius,16px)}
@@ -44,7 +44,7 @@ class MonPoeleGranulesCard extends HTMLElement {
           <div class="form" id="form"></div><div id="message" class="msg" role="status"></div></div>
           <div class="section"><h3>Historique des achats</h3><div id="purchases"></div></div>
           <div class="section"><h3>Calendrier d'entretien</h3><div id="maintenance"></div></div>
-        </div></ha-card>\`;
+        </div></ha-card>`;
       this.shadowRoot.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => this.openForm(b.dataset.open)));
     }
   }
@@ -89,31 +89,31 @@ class MonPoeleGranulesCard extends HTMLElement {
       ["Total achats","spent","€"],["Prochain entretien","next",""]
     ];
     this.shadowRoot.getElementById("stats").innerHTML=stats.map(([title,k,unit])=>
-      \`<div class="tile"><div class="label">\${this.escape(title)}</div><div class="value">\${this.escape(k==="next"?(this.find("next")?.state||"—"):this.number(k))} <span class="unit">\${unit}</span></div></div>\`).join("");
+      `<div class="tile"><div class="label">${this.escape(title)}</div><div class="value">${this.escape(k==="next"?(this.find("next")?.state||"—"):this.number(k))} <span class="unit">${unit}</span></div></div>`).join("");
     const days=this.find("total")?.attributes.historique_jour||{};
     const dates=Array.from({length:7},(_,i)=>{let d=new Date();d.setDate(d.getDate()-(6-i));return d.toLocaleDateString("sv-SE");});
     const series=dates.map(k=>({day:k,kg:Number(days[k]?.kg)||0}));
     const max=Math.max(1,...series.map(x=>x.kg));
-    this.shadowRoot.getElementById("chart").innerHTML=\`<div class="bars">\${series.map(v=>\`<div class="barcol"><div class="small">\${v.kg.toFixed(1)}</div><div class="bar" title="\${v.kg.toFixed(2)} kg" style="height:\${Math.max(2,v.kg/max*83)}px"></div><div class="barlabel">\${this.escape(v.day.slice(5))}</div></div>\`).join("")}</div>\`;
+    this.shadowRoot.getElementById("chart").innerHTML=`<div class="bars">${series.map(v=>`<div class="barcol"><div class="small">${v.kg.toFixed(1)}</div><div class="bar" title="${v.kg.toFixed(2)} kg" style="height:${Math.max(2,v.kg/max*83)}px"></div><div class="barlabel">${this.escape(v.day.slice(5))}</div></div>`).join("")}</div>`;
     const purchases=this.find("stock")?.attributes.achats_recents||[];
     this.shadowRoot.getElementById("purchases").innerHTML=purchases.length?purchases.slice(-5).reverse().map(x=>
-      \`<div class="line"><b>\${this.escape(x.date)} · \${this.escape(x.bags)} sacs (\${this.escape(x.kg)} kg)</b><div class="small">\${this.escape(x.total_eur)} € · \${this.escape(x.note||"")}</div></div>\`).join(""):'<div class="small">Aucun achat enregistré</div>';
+      `<div class="line"><b>${this.escape(x.date)} · ${this.escape(x.bags)} sacs (${this.escape(x.kg)} kg)</b><div class="small">${this.escape(x.total_eur)} € · ${this.escape(x.note||"")}</div></div>`).join(""):'<div class="small">Aucun achat enregistré</div>';
     const maint=this.find("next")?.attributes.entretiens_recents||[];
     this.shadowRoot.getElementById("maintenance").innerHTML=maint.length?maint.slice(-5).reverse().map(x=>
-      \`<div class="line"><b>\${this.escape(x.description)}</b><div class="small">Effectué : \${this.escape(x.date)} · Prochain : \${this.escape(x.next_due||"non défini")}</div></div>\`).join(""):'<div class="small">Aucun entretien enregistré</div>';
+      `<div class="line"><b>${this.escape(x.description)}</b><div class="small">Effectué : ${this.escape(x.date)} · Prochain : ${this.escape(x.next_due||"non défini")}</div></div>`).join(""):'<div class="small">Aucun entretien enregistré</div>';
   }
   openForm(type){
     this._formType=type;
     const el=this.shadowRoot.getElementById("form");
     const field=(name,label,inputType="text",value="",required=true)=>
-      \`<label>\${label}<input name="\${name}" type="\${inputType}" value="\${this.escape(value)}" \${required?"required":""} \${inputType==="number"?'min="0" step="any"':""}></label>\`;
+      `<label>${label}<input name="${name}" type="${inputType}" value="${this.escape(value)}" ${required?"required":""} ${inputType==="number"?'min="0" step="any"':""}></label>`;
     const today=new Date().toLocaleDateString("sv-SE");
     let form="";
     if(type==="purchase")form=field("sacs","Nombre de sacs","number","1")+field("montant_eur","Montant total (€)","number","0")+field("date","Date","date",today)+field("note","Note","text","",false);
     else if(type==="stock")form=field("sacs_reels","Stock réel (nombre de sacs)","number",this.number("sacs"))+field("note","Motif","text","Inventaire",false);
     else if(type==="maintenance")form=field("entretien","Type d'entretien")+field("date","Date réalisée","date",today)+field("prochaine_date","Prochaine échéance","date","",false)+field("note","Note","text","",false);
     else form='<p class="small">Démarre une calibration, puis termine-la après avoir consommé une quantité connue de sacs. Une correction du stock sera appliquée.</p>'+field("sacs_consommes","Sacs consommés depuis le début","number","1");
-    el.innerHTML=\`<h3>\${{purchase:"Ajouter un achat",stock:"Corriger le stock",maintenance:"Enregistrer un entretien",calibration:"Calibration"}[type]}</h3><form id="pellet-form"><div class="fields">\${form}</div><div class="row" style="margin-top:12px">\${type==="calibration"?'<button type="button" id="start">Démarrer la calibration</button>':''}<button class="primary" type="submit">\${type==="calibration"?"Terminer la calibration":"Enregistrer"}</button><button type="button" id="cancel">Annuler</button></div></form>\`;
+    el.innerHTML=`<h3>${{purchase:"Ajouter un achat",stock:"Corriger le stock",maintenance:"Enregistrer un entretien",calibration:"Calibration"}[type]}</h3><form id="pellet-form"><div class="fields">${form}</div><div class="row" style="margin-top:12px">${type==="calibration"?'<button type="button" id="start">Démarrer la calibration</button>':''}<button class="primary" type="submit">${type==="calibration"?"Terminer la calibration":"Enregistrer"}</button><button type="button" id="cancel">Annuler</button></div></form>`;
     el.classList.add("open");
     el.querySelector("#cancel").onclick=()=>el.classList.remove("open");
     el.querySelector("#pellet-form").onsubmit=e=>{e.preventDefault();this.submit(type,new FormData(e.target));};
