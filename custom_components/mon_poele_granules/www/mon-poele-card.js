@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.6 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.7 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -65,12 +65,81 @@ class MonPoeleGranulesCard extends HTMLElement {
           .calendar-choice .actions button{flex:1;min-width:120px;padding:12px 8px}
           #form{scroll-margin-top:110px}
           #metric-controls button{font-weight:650;padding:9px 13px}
+
+          /* 0.3.7 : présentation complète inspirée du tableau de bord validé */
+          :host{--pellet-panel:linear-gradient(155deg,rgba(19,34,52,.96),rgba(25,22,41,.97));--pellet-line:rgba(176,195,226,.13);--pellet-muted:#b6c1d2}
+          .wrap{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;padding:clamp(12px,2.5vw,23px)!important;background:linear-gradient(155deg,#111d2d 0%,#15152b 48%,#1c1328 100%)!important;border:1px solid var(--pellet-line);box-shadow:0 9px 32px rgba(0,0,0,.16)}
+          .head{margin:0 0 4px!important;padding:6px 4px 10px;border-bottom:1px solid var(--pellet-line)}
+          .head h2{font-size:clamp(21px,3vw,27px);line-height:1.12;margin:4px 0 5px;letter-spacing:-.02em}
+          .eyebrow{font-size:10px;color:#9db4d9;letter-spacing:.16em;font-weight:800}
+          .head .small{font-size:12px;color:var(--pellet-muted)}
+          .running-indicator{font-size:12px;font-weight:700;white-space:nowrap;border-radius:25px;border:1px solid rgba(197,206,224,.22);background:rgba(255,255,255,.08);padding:9px 12px}
+          .stove-hero{margin:0!important;min-height:178px;padding:16px!important;background:radial-gradient(circle at 28% 70%,rgba(255,156,61,.08),transparent 45%),linear-gradient(125deg,#1c3344,#24172d)!important;border:1px solid rgba(175,198,230,.22)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.06)}
+          .stove-picture{height:185px;width:147px;flex-basis:147px}
+          .stove-details .stove-status{font-size:clamp(18px,3.5vw,25px);line-height:1.25}
+          .stove-details .small{font-size:13px;color:#c3cedc}
+          #stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+          .tile{min-height:86px;padding:13px 15px;border:1px solid var(--pellet-line);border-radius:14px;background:linear-gradient(145deg,#1a2637,#1c1b2e);box-shadow:inset 0 1px 0 rgba(255,255,255,.035);display:flex;flex-direction:column;justify-content:space-between}
+          .tile-top{display:flex;align-items:center;gap:8px;min-width:0}
+          .tile-icon{font-size:16px;line-height:1;flex:0 0 auto}
+          .tile .label{font-size:12px;color:#bec8d8;line-height:1.28}
+          .tile .value{margin:10px 0 0;font-size:clamp(20px,3.4vw,27px);line-height:1.15;color:#fff;word-break:normal}
+          .tile .unit{font-size:12px;color:#c6d1e0}
+          .tile-stock{border-color:rgba(76,192,122,.37);background:linear-gradient(145deg,#1c382f,#1a2a34)}
+          .tile-sacs{border-color:rgba(56,156,222,.33)}
+          .tile-today,.tile-month{border-color:rgba(156,121,226,.29)}
+          .tile-next{border-color:rgba(240,175,77,.3)}
+          .section{margin:0!important;min-width:0;padding:16px 15px 14px;border-radius:16px;background:var(--pellet-panel);border:1px solid var(--pellet-line);box-shadow:0 4px 13px rgba(0,0,0,.09)}
+          .section h3{display:flex;align-items:center;gap:8px;margin:0 0 15px;font-size:15px!important;letter-spacing:0!important;font-weight:750;flex-wrap:wrap}
+          .section-symbol{font-size:17px}
+          .section-subtitle{font-size:10px;color:#93aac6;font-weight:600;margin-left:auto}
+          .section svg{max-width:100%;min-height:unset!important}
+          .section .small{color:#b6c3d3}
+          .section .line{padding:11px 6px;border-top:1px solid rgba(174,194,223,.15);line-height:1.5}
+          .section .line b{font-size:13px}
+          .section .line .small{font-size:12px}
+          .section-tools .actions{gap:8px}
+          .section-tools .actions button{min-height:40px;background:rgba(106,129,166,.14)}
+          .section button{transition:background .15s ease,box-shadow .15s ease}
+          .section button:focus-visible{outline:2px solid #ffa726;outline-offset:2px}
+          #metric-controls{gap:6px!important}
+          #metric-controls button{padding:8px 10px!important;font-size:12px}
+          #maintenance .day-cell{border:1px solid rgba(255,255,255,.08);box-shadow:inset 0 1px 0 rgba(255,255,255,.04)}
+          #maintenance button[data-day-action]{font-size:13px;height:24px;background:rgba(12,16,25,.72)}
+          .calendar-choice{background:rgba(31,51,75,.9)}
+          .section-calendar #month-label{text-transform:capitalize}
+          .section-calendar #prev-month,.section-calendar #next-month{background:#243349;border:0;min-width:38px;min-height:38px}
+          @media(min-width:900px){
+            .wrap{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+            .head{grid-column:1/-1}
+            .stove-hero{grid-column:1;min-height:240px}
+            #stats{grid-column:2;grid-row:2;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;align-self:stretch}
+            .tile{min-height:62px;padding:9px}
+            .tile .value{font-size:19px;margin-top:5px}
+            .tile .label{font-size:11px}
+            .tile-icon{font-size:13px}
+            .section-chart{grid-column:1;grid-row:3}
+            .section-calendar{grid-column:2;grid-row:3 / span 2}
+            .section-seasons{grid-column:1;grid-row:4}
+            .section-history{grid-column:1;grid-row:5}
+            .section-tools{grid-column:2;grid-row:5}
+          }
+          @media(max-width:450px){
+            .wrap{gap:10px}
+            .stove-hero{min-height:155px;padding:10px!important;gap:8px}
+            .stove-picture{height:148px;width:112px;flex-basis:112px}
+            .tile{min-height:77px;padding:11px}
+            .tile .value{font-size:22px}
+            .section{padding:13px 11px}
+            .section h3{font-size:14px!important}
+            .section-calendar #maintenance{margin:0 -2px}
+          }
           @media(max-width:520px){.wrap{padding:12px}.section{margin-top:24px}.section svg{min-height:120px}}
           @media(min-width:680px){.grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
           @media(max-width:410px){.fields{grid-template-columns:1fr}.tile .value{font-size:20px}}
         </style>
         <ha-card><div class="wrap">
-          <div class="head"><div><h2>🔥 Mon Poêle à Granulés</h2><div class="small">Stock, consommation et entretien</div></div><div id="running"></div></div>
+          <div class="head"><div><div class="eyebrow">TABLEAU DE BORD • GRANULÉS</div><h2>Mon Poêle à Granulés</h2><div class="small">Stock, consommation et entretien</div></div><div id="running" class="running-indicator"></div></div>
           <div class="stove-hero" id="stove-hero" data-active="unknown" aria-label="État du poêle">
             <svg class="stove-picture" viewBox="0 0 140 175" role="img" aria-label="Poêle à granulés blanc aux panneaux latéraux blancs et façade noire">
               <defs>
@@ -96,14 +165,14 @@ class MonPoeleGranulesCard extends HTMLElement {
             <div class="stove-details"><div id="stove-status" class="stove-status unknown">État inconnu</div><div class="small" id="stove-subtitle">Animation synchronisée avec le capteur de fonctionnement.</div></div>
           </div>
           <div class="grid" id="stats"></div>
-          <div class="section"><h3>📈 ÉVOLUTION DE LA CONSOMMATION</h3><div id="chart"></div></div><div class="section"><h3>💶 PRIX MOYEN DU SAC PAR SAISON</h3><div id="metric-controls" style="display:flex;flex-wrap:wrap;gap:7px"></div><div id="seasons"></div></div>
-          <div class="section"><h3>Achats et entretiens</h3><div class="actions">
+          <div class="section section-chart"><h3><span class="section-symbol">📈</span> Évolution de la consommation <span class="section-subtitle">Octobre — septembre</span></h3><div id="chart"></div></div><div class="section section-seasons"><h3><span class="section-symbol">💶</span> Prix moyen du sac par saison</h3><div id="metric-controls" style="display:flex;flex-wrap:wrap;gap:7px"></div><div id="seasons"></div></div>
+          <div class="section section-tools"><h3><span class="section-symbol">⚙️</span> Gestion du poêle</h3><div class="actions">
             <button data-open="stock">Corriger stock</button>
             <button data-open="calibration">Calibrer</button><button id="legacy-import-button" type="button">Importer CSV</button><input id="legacy-import-file" type="file" accept=".csv,text/csv" style="display:none">
           </div>
           <div id="message" class="msg" role="status"></div></div>
-          <div class="section"><h3>🧾 DERNIÈRES SAISIES</h3><div id="purchases"></div></div>
-          <div class="section"><h3>📅 CALENDRIER DES AJOUTS</h3><div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0"><button id="prev-month">‹</button><strong id="month-label"></strong><button id="next-month">›</button></div><div id="maintenance"></div><div id="calendar-choice" class="calendar-choice" hidden></div><div class="form" id="form"></div><div class="small" style="margin-top:12px">🟢 Achat · 🔴 Consommation · 🟠 Entretien · 🔵 Dépannage · 🟣 Révision · 🟣 Nettoyage</div></div>
+          <div class="section section-history"><h3><span class="section-symbol">🧾</span> Dernières saisies</h3><div id="purchases"></div></div>
+          <div class="section section-calendar"><h3><span class="section-symbol">📅</span> Calendrier des événements</h3><div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0"><button id="prev-month">‹</button><strong id="month-label"></strong><button id="next-month">›</button></div><div id="maintenance"></div><div id="calendar-choice" class="calendar-choice" hidden></div><div class="form" id="form"></div><div class="small" style="margin-top:12px">🟢 Achat · 🔴 Consommation · 🟠 Entretien · 🔵 Dépannage · 🟣 Révision · 🟣 Nettoyage</div></div>
         </div></ha-card>`;
       this.shadowRoot.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => this.openForm(b.dataset.open)));
       this.shadowRoot.getElementById("legacy-import-button").onclick=()=>this.shadowRoot.getElementById("legacy-import-file").click();
@@ -194,7 +263,7 @@ class MonPoeleGranulesCard extends HTMLElement {
       ["Total achats","spent","€"],["Prochain entretien","next",""]
     ];
     this.shadowRoot.getElementById("stats").innerHTML=stats.map(([title,k,unit])=>
-      `<div class="tile"><div class="label">${this.escape(title)}</div><div class="value">${this.escape(k==="next"?(this.find("next")?.state||"—"):this.number(k))} <span class="unit">${unit}</span></div></div>`).join("");
+      `<div class="tile tile-${k}"><div class="tile-top"><span class="tile-icon" aria-hidden="true">${({stock:"📦",sacs:"🪵",today:"📆",month:"📊",total:"🔥",hoursToday:"⏱️",rate:"⚙️",power:"⚡",hours:"🕒",energy:"🔌",spent:"💶",next:"🔧"})[k]||"•"}</span><div class="label">${this.escape(title)}</div></div><div class="value">${this.escape(k==="next"?(this.find("next")?.state||"—"):this.number(k))} <span class="unit">${unit}</span></div></div>`).join("");
     this.renderHistory();
   }
 
