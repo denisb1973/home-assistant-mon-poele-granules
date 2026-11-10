@@ -22,14 +22,14 @@ La puissance supérieure au seuil réglé indique que le poêle est en marche. �
 
 Un calendrier affiche achats, entretiens effectués et prochaines échéances.
 
-## Tableau de bord personnalisé — version 0.2.1
+## Tableau de bord personnalisé — version 0.2.2
 La carte `mon-poele-granules-card` (compatible iPhone et PC) affiche le stock en sacs/kg, la consommation du jour/mois et sur sept jours, les heures de fonctionnement, les achats et l'entretien.
 
 Après la mise à jour HACS et le redémarrage Home Assistant :
 
 1. Ouvrir un tableau de bord puis **Modifier le tableau de bord**.
 2. Dans **⋮ → Gérer les ressources** (parfois Paramètres → Tableaux de bord → Ressources), ajouter le module JavaScript suivant :
-   - URL : `/mon_poele_granules/mon-poele-card.js?v=021`
+   - URL : `/mon_poele_granules/mon-poele-card.js`
    - Type : **Module JavaScript**.
 3. Créer une nouvelle carte **Manuelle** et saisir :
 
@@ -61,7 +61,14 @@ Ces ID sont des exemples : ils doivent être adaptés aux vrais ID visibles dans
 
 La carte utilise les actions de l'intégration pour les formulaires d'achat, correction du stock, entretien et calibration. Elle affiche l'historique récemment stocké dans les attributs des capteurs.
 
-**Version 0.2.1 expérimentale** : installation du tableau de bord à valider dans Home Assistant. Aucune modification des données existantes du poêle n'est effectuée par l'ajout de la carte.
+**Version 0.2.2 expérimentale** : installation du tableau de bord à valider dans Home Assistant. Aucune modification des données existantes du poêle n'est effectuée par l'ajout de la carte.
 
 ## Types d'intervention
 Le formulaire **+ Entretien** offre trois choix : Entretien, Dépannage et Révision. Chaque intervention garde ses dates et sa description. Les anciennes interventions restent inchangées.
+
+## Mises à jour sans modification du YAML
+À partir de la version 0.2.2, chaque modification de la version dans le fichier `manifest.json` déclenche un workflow GitHub Actions qui crée une release GitHub avec un tag `vX.Y.Z`. HACS peut ainsi identifier les nouvelles versions et proposer leur installation (selon son cycle d'actualisation).
+
+La ressource Lovelace est chargée depuis une **URL fixe** : `/mon_poele_granules/mon-poele-card.js`. Dans les paramètres **Ressources** de Home Assistant, remplacer **une seule fois** l'ancienne URL avec `?v=020` ou `?v=021` par cette URL fixe, en conservant le type **Module JavaScript**. Ne pas créer de ressource en double. Les prochaines mises à jour ne demanderont plus aucune modification du YAML de la carte : `type: custom:mon-poele-granules-card`.
+
+Après une mise à jour HACS, redémarrer Home Assistant si nécessaire puis actualiser la page pour charger le JavaScript récent. Home Assistant ne garantit pas le chargement instantané d'une mise à jour sur les navigateurs déjà ouverts. La mise à jour HACS doit encore être installée par l'utilisateur ; la publication n'impose aucun déploiement automatique sur l'instance.
