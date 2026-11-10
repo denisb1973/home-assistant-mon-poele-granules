@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.20 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.21 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -379,6 +379,87 @@ class MonPoeleGranulesCard extends HTMLElement {
               padding:6px 9px!important;
             }
             .wrap[data-view="accueil"] > #stats .tile .value{font-size:19px!important}
+          }
+
+          /* 0.3.21 : photo adaptée à l'écran et valeurs compactes en haut à droite.
+             Mise en page CSS uniquement : DOM, services, calendrier et données inchangés. */
+          .wrap[data-view] > .head h2{display:none!important}
+          .wrap[data-view="accueil"] > .dashboard-nav{
+            grid-row:1!important;grid-column:1!important;
+          }
+          .wrap[data-view="accueil"] > .stove-hero{
+            grid-row:2!important;grid-column:1!important;
+            height:clamp(390px,calc(100dvh - 165px),590px)!important;
+            min-height:0!important;max-height:590px!important;
+          }
+          .wrap[data-view="accueil"] > .head{
+            grid-row:2!important;grid-column:1!important;
+            align-self:start!important;justify-self:end!important;
+            z-index:4!important;position:relative!important;
+            width:auto!important;min-width:0!important;
+            padding:10px 15px!important;margin:0!important;
+            background:transparent!important;border:0!important;
+            box-shadow:none!important;pointer-events:none!important;
+          }
+          .wrap[data-view="accueil"] > .head .running-indicator{
+            background:rgba(15,24,37,.52)!important;
+            border:1px solid rgba(255,255,255,.43)!important;
+            color:#fff!important;
+            -webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px);
+          }
+          .wrap[data-view="accueil"] > #stats{
+            grid-row:2!important;grid-column:1!important;
+            align-self:start!important;justify-self:stretch!important;
+            grid-template-columns:repeat(3,minmax(0,1fr))!important;
+            padding:clamp(54px,6.8dvh,66px) 3% 8px 38%!important;
+            gap:7px!important;
+          }
+          .wrap[data-view="accueil"] > #stats .tile{
+            height:clamp(49px,6.8dvh,61px)!important;
+            min-height:0!important;max-height:61px!important;
+            padding:6px 9px!important;border-radius:10px!important;
+            gap:2px!important;
+            background:rgba(18,28,41,.41)!important;
+          }
+          .wrap[data-view="accueil"] > #stats .tile-stock{
+            background:rgba(12,77,52,.53)!important;
+          }
+          .wrap[data-view="accueil"] > #stats .tile .label{
+            font-size:clamp(9px,.95vw,12px)!important;
+            line-height:1.1!important;
+          }
+          .wrap[data-view="accueil"] > #stats .tile .value{
+            font-size:clamp(17px,1.8vw,23px)!important;
+            line-height:1.08!important;
+          }
+          .wrap[data-view="accueil"] > #stats .tile .unit{
+            font-size:clamp(10px,1vw,12px)!important;
+          }
+          .wrap[data-view="accueil"] > #stats .tile-icon{
+            font-size:13px!important;line-height:1!important;
+          }
+          .wrap[data-view="accueil"] > .stove-hero::after{
+            background:linear-gradient(90deg,transparent 0%,transparent 31%,rgba(10,17,28,.05) 42%,rgba(10,17,28,.08) 100%)!important;
+          }
+          @media (max-width:699px){
+            .wrap[data-view="accueil"] > .stove-hero{
+              height:clamp(620px,calc(100dvh - 120px),790px)!important;
+              min-height:0!important;max-height:790px!important;
+            }
+            .wrap[data-view="accueil"] > #stats{
+              grid-template-columns:repeat(2,minmax(0,1fr))!important;
+              align-self:end!important;
+              padding:8px!important;gap:6px!important;
+            }
+            .wrap[data-view="accueil"] > #stats .tile{
+              height:clamp(47px,5.7dvh,55px)!important;
+              padding:5px 8px!important;
+            }
+            .wrap[data-view="accueil"] > #stats .tile .label{font-size:10px!important}
+            .wrap[data-view="accueil"] > #stats .tile .value{font-size:18px!important}
+            .wrap[data-view="accueil"] > .stove-hero::after{
+              background:linear-gradient(180deg,transparent 0%,transparent 25%,rgba(8,14,25,.14) 48%,rgba(8,14,25,.60) 100%)!important;
+            }
           }
 </style>
         <ha-card><div class="wrap">
