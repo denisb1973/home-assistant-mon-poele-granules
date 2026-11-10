@@ -1,9 +1,10 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.13 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.14 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
     this._calendarDate ||= new Date(new Date().getFullYear(),new Date().getMonth(),1);
     this._chartMetric ||= 'prix';
+    this._activeView ||= 'accueil';
     if (!this.shadowRoot) {
       this.attachShadow({ mode: "open" });
       this.shadowRoot.innerHTML = String.raw`
@@ -194,9 +195,35 @@ class MonPoeleGranulesCard extends HTMLElement {
           }
           @media(min-width:900px){.stove-hero{min-height:310px!important}.stove-details{max-width:50%}}
           .stove-hero{justify-content:center!important}
+
+          /* v0.3.14: onglets réels (mobile et PC) */
+          .wrap[data-view]{grid-template-columns:minmax(0,1fr)!important}
+          .wrap[data-view] > *{grid-column:auto!important;grid-row:auto!important}
+          .dashboard-nav{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:5px;padding:5px;background:rgba(10,18,34,.72);border:1px solid rgba(155,177,209,.18);border-radius:15px;min-width:0}
+          .dashboard-nav button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-width:0;padding:8px 2px;border:0;border-radius:11px;font-size:10px;line-height:1.25;white-space:normal;color:#afc0d7;background:transparent;transition:background .15s ease,color .15s ease}
+          .dashboard-nav button .nav-icon{font-size:19px;line-height:1}
+          .dashboard-nav button[aria-current="page"]{background:linear-gradient(140deg,#6c2a95,#44205d);color:#fff;font-weight:750;box-shadow:0 3px 12px rgba(0,0,0,.18)}
+          .dashboard-nav button:focus-visible{outline:2px solid #ffb344;outline-offset:2px}
+          .wrap[data-view] > .stove-hero,.wrap[data-view] > #stats,.wrap[data-view] > .section{display:none!important}
+          .wrap[data-view="accueil"] > .stove-hero{display:flex!important}
+          .wrap[data-view="accueil"] > #stats{display:grid!important}
+          .wrap[data-view="consommation"] > .section-chart{display:block!important}
+          .wrap[data-view="historique"] > .section-history,.wrap[data-view="historique"] > .section-calendar{display:block!important}
+          .wrap[data-view="comparaison"] > .section-seasons{display:block!important}
+          .wrap[data-view="parametres"] > .section-tools{display:block!important}
+          .wrap[data-view] > .head,.wrap[data-view] > .dashboard-nav{grid-column:1/-1!important}
+          @media(min-width:680px){.dashboard-nav button{font-size:13px;flex-direction:row;gap:8px;padding:12px 8px}.dashboard-nav button .nav-icon{font-size:20px}}
+          @media(max-width:380px){.dashboard-nav{gap:3px;padding:3px}.dashboard-nav button{font-size:9px}.dashboard-nav button .nav-icon{font-size:17px}}
 </style>
         <ha-card><div class="wrap">
           <div class="head"><div><div class="eyebrow">TABLEAU DE BORD • GRANULÉS</div><h2>Mon Poêle à Granulés</h2><div class="small">Stock, consommation et entretien</div></div><div id="running" class="running-indicator"></div></div>
+          <nav class="dashboard-nav" aria-label="Navigation du poêle">
+            <button type="button" data-view-button="accueil" aria-current="page"><span class="nav-icon" aria-hidden="true">⌂</span><span>Accueil</span></button>
+            <button type="button" data-view-button="consommation"><span class="nav-icon" aria-hidden="true">▥</span><span>Conso.</span></button>
+            <button type="button" data-view-button="historique"><span class="nav-icon" aria-hidden="true">▦</span><span>Historique</span></button>
+            <button type="button" data-view-button="comparaison"><span class="nav-icon" aria-hidden="true">⌁</span><span>Comparaison</span></button>
+            <button type="button" data-view-button="parametres"><span class="nav-icon" aria-hidden="true">⚙</span><span>Réglages</span></button>
+          </nav>
           <div class="stove-hero" id="stove-hero" data-active="unknown" aria-label="État du poêle">
 
             <svg class="room-scene" viewBox="0 0 1536 864" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Salon avec poêle à granulés blanc et noir">
@@ -226,6 +253,10 @@ class MonPoeleGranulesCard extends HTMLElement {
           <div class="section section-history"><h3><span class="section-symbol">🧾</span> Dernières saisies</h3><div id="purchases"></div></div>
           <div class="section section-calendar"><h3><span class="section-symbol">📅</span> Calendrier des événements</h3><div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0"><button id="prev-month">‹</button><strong id="month-label"></strong><button id="next-month">›</button></div><div id="maintenance"></div><div id="calendar-choice" class="calendar-choice" hidden></div><div class="form" id="form"></div><div class="small" style="margin-top:12px">🟢 Achat · 🔴 Consommation · 🟠 Entretien · 🔵 Dépannage · 🟣 Révision · 🟣 Nettoyage</div></div>
         </div></ha-card>`;
+      this.shadowRoot.querySelectorAll("[data-view-button]").forEach(button=>{
+        button.addEventListener("click",()=>this.setView(button.dataset.viewButton));
+      });
+      this.setView(this._activeView);
       this.shadowRoot.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => this.openForm(b.dataset.open)));
       this.shadowRoot.getElementById("legacy-import-button").onclick=()=>this.shadowRoot.getElementById("legacy-import-file").click();
       this.shadowRoot.getElementById("legacy-import-file").onchange=async(event)=>{
@@ -263,6 +294,18 @@ class MonPoeleGranulesCard extends HTMLElement {
         }else this.openForm(button.dataset.calendarAction,this._selectedCalendarDay);
       });
     }
+  }
+  setView(name){
+    const allowed=["accueil","consommation","historique","comparaison","parametres"];
+    this._activeView=allowed.includes(name)?name:"accueil";
+    if(!this.shadowRoot)return;
+    const wrap=this.shadowRoot.querySelector(".wrap");
+    if(!wrap)return;
+    wrap.dataset.view=this._activeView;
+    this.shadowRoot.querySelectorAll("[data-view-button]").forEach(button=>{
+      if(button.dataset.viewButton===this._activeView)button.setAttribute("aria-current","page");
+      else button.removeAttribute("aria-current");
+    });
   }
   set hass(hass) {
     this._hass = hass;
