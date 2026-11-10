@@ -104,7 +104,7 @@ class PelletManager:
 
     async def import_legacy_csv(self, csv_text):
         """Import historical operations for display only; never change current stock."""
-        rows = list(csv.DictReader(io.StringIO(csv_text.lstrip("\\ufeff")), delimiter=";"))
+        rows = list(csv.DictReader(io.StringIO(csv_text.lstrip("\ufeff")), delimiter=";"))
         if not rows:
             raise ValueError("Le fichier CSV est vide")
         expected = {"Saison", "Date", "Type", "Quantite", "Prix par sac", "Prix total", "Note"}
