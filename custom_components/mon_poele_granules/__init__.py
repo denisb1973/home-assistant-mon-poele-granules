@@ -169,6 +169,9 @@ async def async_setup_entry(hass, entry):
         gif_path = www_path / 'poele-granules-anime.gif'
         if gif_path.is_file():
             static_paths.append(StaticPathConfig('/mon_poele_granules/poele-granules-anime.gif', str(gif_path), False))
+        flame_path = www_path / 'flamme_reelle_transparente.webp'
+        if flame_path.is_file():
+            static_paths.append(StaticPathConfig('/mon_poele_granules/flamme_reelle_transparente.webp', str(flame_path), False))
         await hass.http.async_register_static_paths(static_paths)
         hass.data['_mon_poele_granules_card_registered'] = True
     manager = PelletManager(hass, entry)
