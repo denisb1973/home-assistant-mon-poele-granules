@@ -252,6 +252,26 @@ class MonPoeleGranulesCard extends HTMLElement {
             #maintenance .day-cell button[data-date]{font-size:13px!important}
             .dashboard-nav .nav-icon svg{width:17px;height:17px}
           }
+          /* v0.3.34 — calendrier lisible, commandes tactiles conservées */
+          #maintenance .day-cell{display:flex;flex-direction:column;border-radius:8px;min-height:78px;box-sizing:border-box}
+          #maintenance .day-cell button[data-date]:not([data-day-action]){flex:1;min-height:34px!important;padding:7px 2px 3px!important;font-size:20px!important;font-weight:700!important;color:#fff!important;text-shadow:0 1px 3px #000;align-items:center!important}
+          #maintenance .day-actions{position:static;display:flex;gap:4px;margin:0 4px 4px;min-width:0}
+          #maintenance .day-cell button[data-day-action]{width:auto;height:32px!important;min-height:32px!important;padding:0!important;border:1px solid rgba(255,255,255,.28);border-radius:6px!important;background:rgba(12,16,25,.82)!important;color:#fff}
+          #maintenance .day-cell button[data-day-action] svg{width:20px;height:20px;min-height:0!important;max-width:100%;margin:0!important;display:block;flex:none}
+          .section-calendar #month-label{font-size:18px;color:#fff}
+          .section-calendar #prev-month,.section-calendar #next-month{min-width:44px;min-height:44px;font-size:24px;line-height:1}
+          @media(min-width:680px){
+            #maintenance .day-cell{min-height:88px}
+            #maintenance .day-cell button[data-day-action]{height:40px!important;min-height:40px!important}
+            #maintenance .day-cell button[data-day-action] svg{width:24px;height:24px}
+          }
+          @media(max-width:520px){
+            #maintenance .day-cell{min-height:65px}
+            #maintenance .day-cell button[data-date]:not([data-day-action]){font-size:16px!important;min-height:29px!important;padding:4px 1px!important}
+            #maintenance .day-actions{gap:2px;margin:0 2px 3px}
+            #maintenance .day-cell button[data-day-action]{height:27px!important;min-height:27px!important}
+            #maintenance .day-cell button[data-day-action] svg{width:16px;height:16px}
+          }
           #chart svg{height:auto;min-height:0!important}
 
           /* V0.3.19 — Accueil immersif sans changement de structure HTML/JS.
