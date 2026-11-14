@@ -781,6 +781,9 @@ class MonPoeleGranulesCard extends HTMLElement {
   openForm(type,chosenDate){
     this._formType=type;
     const el=this.shadowRoot.getElementById("form");
+    // Keep the shared form inside the visible tab that owns the action.
+    const section=this.shadowRoot.querySelector(type==="stock"||type==="calibration"?".section-tools":".section-calendar");
+    if(section&&el.parentElement!==section)section.appendChild(el);
     const field=(name,label,inputType="text",value="",required=true)=>
       `<label>${label}<input name="${name}" type="${inputType}" value="${this.escape(value)}" ${required?"required":""} ${inputType==="number"?'min="0" step="any"':""}></label>`;
     const today=chosenDate||this.dayKey(new Date());
