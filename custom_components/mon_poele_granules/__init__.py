@@ -4,7 +4,8 @@ import csv
 import io
 import hashlib
 from pathlib import Path
-from homeassistant.components.http import StaticPathConfig
+from aiohttp import web
+from homeassistant.components.http import HomeAssistantView, StaticPathConfig
 import voluptuous as vol
 from homeassistant.core import callback
 from homeassistant.helpers.storage import Store
@@ -13,6 +14,23 @@ from homeassistant.util import dt as dt_util
 from .const import DOMAIN
 
 PLATFORMS = ["sensor", "calendar"]
+
+
+class PelletCardView(HomeAssistantView):
+    """Serve the dashboard module without persisting outdated browser copies."""
+
+    url = "/mon_poele_granules/mon-poele-card.js"
+    name = "api:mon_poele_granules:card"
+    requires_auth = False  # Same public static resource as before; no user data.
+
+    async def get(self, request):
+        card_path = Path(__file__).parent / "www" / "mon-poele-card.js"
+        content = await request.app["hass"].async_add_executor_job(card_path.read_bytes)
+        return web.Response(
+            body=content,
+            content_type="application/javascript",
+            headers={"Cache-Control": "no-store, no-cache, must-revalidate, max-age=0", "Pragma": "no-cache", "Expires": "0"},
+        )
 
 class PelletManager:
     def __init__(self, hass, entry):
@@ -164,8 +182,8 @@ class PelletManager:
 async def async_setup_entry(hass, entry):
     if not hass.data.get('_mon_poele_granules_card_registered'):
         www_path = Path(__file__).parent / 'www'
-        card_path = www_path / 'mon-poele-card.js'
-        static_paths = [StaticPathConfig('/mon_poele_granules/mon-poele-card.js', str(card_path), False)]
+        hass.http.register_view(PelletCardView)
+        static_paths = []
         gif_path = www_path / 'poele-granules-anime.gif'
         if gif_path.is_file():
             static_paths.append(StaticPathConfig('/mon_poele_granules/poele-granules-anime.gif', str(gif_path), False))
