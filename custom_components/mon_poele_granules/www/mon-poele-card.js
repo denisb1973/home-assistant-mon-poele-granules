@@ -524,7 +524,7 @@ class MonPoeleGranulesCard extends HTMLElement {
           <div class="section section-chart"><h3><span class="section-symbol">📈</span> Évolution de la consommation <span class="section-subtitle">Octobre — septembre</span></h3><div id="chart"></div></div><div class="section section-seasons"><h3><span class="section-symbol">💶</span> Prix moyen du sac par saison</h3><div id="metric-controls" style="display:flex;flex-wrap:wrap;gap:7px"></div><div id="seasons"></div></div>
           <div class="section section-tools"><h3><span class="section-symbol">⚙️</span> Gestion du poêle</h3><div class="actions">
             <button data-open="stock">Corriger stock</button>
-            <button data-open="calibration">Calibrer</button><button id="legacy-import-button" type="button">Importer CSV</button><input id="legacy-import-file" type="file" accept=".csv,text/csv" style="display:none">
+            <button data-open="calibration">Calibrer</button><button data-open="rate">Modifier le débit</button><button id="legacy-import-button" type="button">Importer CSV</button><input id="legacy-import-file" type="file" accept=".csv,text/csv" style="display:none">
           </div>
           <div id="message" class="msg" role="status"></div><div class="form" id="settings-form"></div></div>
           <div class="section section-history"><h3><span class="section-symbol">🧾</span> Dernières saisies</h3><div id="purchases"></div></div>
@@ -780,7 +780,7 @@ class MonPoeleGranulesCard extends HTMLElement {
   }
   openForm(type,chosenDate){
     this._formType=type;
-    const settings=type==="stock"||type==="calibration";
+    const settings=type==="stock"||type==="calibration"||type==="rate";
     this.setView(settings?"parametres":"calendrier");
     const el=this.shadowRoot.getElementById(settings?"settings-form":"form");
     this.shadowRoot.getElementById(settings?"form":"settings-form").classList.remove("open");
@@ -790,9 +790,10 @@ class MonPoeleGranulesCard extends HTMLElement {
     let form="";
     if(type==="purchase")form=field("sacs","Nombre de sacs","number","1")+field("montant_eur","Montant total (€)","number","0")+field("date","Date","date",today)+field("note","Note","text","",false);
     else if(type==="stock")form=field("sacs_reels","Stock réel (nombre de sacs)","number",this.number("sacs"))+field("note","Motif","text","Inventaire",false);
+    else if(type==="rate")form='<p class="small">Le nouveau débit s’applique aux prochaines consommations. Le stock et l’historique déjà enregistrés ne sont pas recalculés.</p>'+field("kg_per_hour","Débit estimé (kg/h)","number",this.find("rate")?.state||"1");
     else if(type==="maintenance")form='<label>Type d’intervention<select name="entretien" required style="box-sizing:border-box;width:100%;margin-top:4px;padding:9px;border-radius:7px;border:1px solid var(--divider-color,#777);color:var(--primary-text-color);background:var(--primary-background-color,#222);font:inherit"><option value="Entretien">Entretien</option><option value="Dépannage">Dépannage</option><option value="Révision">Révision</option></select></label>'+field("date","Date réalisée","date",today)+field("prochaine_date","Prochaine échéance","date","",false)+field("note","Description / intervention réalisée","text","",false);
     else form='<p class="small">Démarre une calibration, puis termine-la après avoir consommé une quantité connue de sacs. Une correction du stock sera appliquée.</p>'+field("sacs_consommes","Sacs consommés depuis le début","number","1");
-    el.innerHTML=`<h3>${{purchase:"Ajouter un achat",stock:"Corriger le stock",maintenance:"Enregistrer un entretien",calibration:"Calibration"}[type]}</h3><form id="pellet-form"><div class="fields">${form}</div><div class="row" style="margin-top:12px">${type==="calibration"?'<button type="button" id="start">Démarrer la calibration</button>':''}<button class="primary" type="submit">${type==="calibration"?"Terminer la calibration":"Enregistrer"}</button><button type="button" id="cancel">Annuler</button></div></form>`;
+    el.innerHTML=`<h3>${{purchase:"Ajouter un achat",stock:"Corriger le stock",maintenance:"Enregistrer un entretien",calibration:"Calibration",rate:"Modifier le débit"}[type]}</h3><form id="pellet-form"><div class="fields">${form}</div><div class="row" style="margin-top:12px">${type==="calibration"?'<button type="button" id="start">Démarrer la calibration</button>':''}<button class="primary" type="submit">${type==="calibration"?"Terminer la calibration":"Enregistrer"}</button><button type="button" id="cancel">Annuler</button></div></form>`;
     el.classList.add("open");
     el.scrollIntoView({behavior:"smooth",block:"nearest"});
     el.querySelector("#cancel").onclick=()=>el.classList.remove("open");
@@ -816,7 +817,8 @@ class MonPoeleGranulesCard extends HTMLElement {
     if(type==="purchase"){data.sacs=Number(data.sacs);data.montant_eur=Number(data.montant_eur);}
     if(type==="stock")data.sacs_reels=Number(data.sacs_reels);
     if(type==="calibration")data.sacs_consommes=Number(data.sacs_consommes);
-    this.call({purchase:"ajouter_achat",stock:"corriger_stock",maintenance:"ajouter_entretien",calibration:"terminer_calibration"}[type],data);
+    if(type==="rate")data.kg_per_hour=Number(data.kg_per_hour);
+    this.call({purchase:"ajouter_achat",stock:"corriger_stock",maintenance:"ajouter_entretien",calibration:"terminer_calibration",rate:"modifier_debit"}[type],data);
   }
 }
 if(!customElements.get("mon-poele-granules-card"))customElements.define("mon-poele-granules-card",MonPoeleGranulesCard);
