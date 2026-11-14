@@ -3,6 +3,8 @@ from datetime import timedelta
 import csv
 import io
 import hashlib
+import math
+import logging
 from pathlib import Path
 from aiohttp import web
 from homeassistant.components.http import HomeAssistantView, StaticPathConfig
@@ -14,6 +16,10 @@ from homeassistant.util import dt as dt_util
 from .const import DOMAIN
 
 PLATFORMS = ["sensor", "calendar"]
+_LOGGER = logging.getLogger(__name__)
+MIN_CALIBRATION_HOURS = 1.0
+MIN_RATE = 0.1
+MAX_RATE = 5.0
 
 
 class PelletCardView(HomeAssistantView):
@@ -46,7 +52,59 @@ class PelletManager:
             "consumed_kg": 0.0, "runtime_h": 0.0, "by_day": {},
             "purchases": [], "maintenances": [], "adjustments": [], "calibration": None
         }
+        await self.recover_invalid_calibration()
         self.last_tick = dt_util.utcnow()
+
+    async def recover_invalid_calibration(self):
+        """Undo a rejected historical calibration and its subsequent overcount."""
+        bad_rate = float(self.data.get("kg_per_hour", self.entry.data["kg_per_hour"]))
+        if math.isfinite(bad_rate) and MIN_RATE <= bad_rate <= MAX_RATE:
+            return
+        last = self.data.get("last_calibration") or {}
+        adjustments = self.data.setdefault("adjustments", [])
+        previous = float(self.entry.data["kg_per_hour"])
+        if not math.isfinite(previous) or not MIN_RATE <= previous <= MAX_RATE:
+            previous = 1.0
+        # Only roll back when the saved calibration and its adjustment agree.
+        try:
+            duration = float(last["runtime_h"])
+            actual = float(last["actual_kg"])
+            end_runtime = float(last["start_runtime"]) + duration
+            elapsed = max(0.0, float(self.data["runtime_h"]) - end_runtime)
+            index = next(i for i in range(len(adjustments)-1, -1, -1)
+                         if adjustments[i].get("note") == "Correction après calibration"
+                         and adjustments[i].get("date") == last["end_date"])
+            delta = float(adjustments[index]["delta_kg"])
+            old_rate = (actual + delta) / duration
+            if not (duration > 0 and math.isfinite(bad_rate) and math.isclose(float(last["new_rate"]), bad_rate) and math.isclose(actual / duration, bad_rate) and MIN_RATE <= old_rate <= MAX_RATE):
+                raise ValueError("Calibration incohérente")
+            remaining = elapsed
+            reductions = []
+            for day, bucket in sorted(self.data["by_day"].items(), reverse=True):
+                if day < last["end_date"] or remaining <= 1e-8:
+                    break
+                hours = min(remaining, float(bucket["hours"]))
+                excess = hours * (bad_rate - old_rate)
+                if float(bucket["kg"]) + 1e-6 < excess:
+                    raise ValueError("Historique journalier incohérent")
+                reductions.append((day, excess))
+                remaining -= hours
+            if remaining > 1e-6:
+                raise ValueError("Historique insuffisant")
+            excess_total = -delta + elapsed * (bad_rate - old_rate)
+            self.data["invalid_calibration_recovery"] = {"calibration": dict(last), "old_rate": old_rate, "rejected_rate": bad_rate, "stock_before": self.data["stock_kg"], "consumed_before": self.data["consumed_kg"], "daily_before": {day: self.data["by_day"][day]["kg"] for day, _ in reductions}, "adjustment_kg": excess_total}
+            for day, excess in reductions:
+                self.data["by_day"][day]["kg"] -= excess
+            self.data["consumed_kg"] -= excess_total
+            self.data["stock_kg"] += excess_total
+            self.data["kg_per_hour"] = old_rate
+            self.data["last_calibration"] = None
+            adjustments.append({"date": dt_util.as_local(dt_util.utcnow()).date().isoformat(), "delta_kg": excess_total, "note": "Annulation calibration invalide et surconsommation estimée"})
+        except (KeyError, TypeError, ValueError, ZeroDivisionError, StopIteration) as err:
+            self.data["kg_per_hour"] = previous
+            _LOGGER.error("Débit invalide restauré à %s kg/h ; stock et historique à contrôler : %s", previous, err)
+        self.data["calibration"] = None
+        await self.store.async_save(self.data)
 
     @property
     def power(self):
@@ -161,13 +219,16 @@ class PelletManager:
         if not calibration:
             raise ValueError("Démarrer la calibration avant de la terminer")
         runtime = self.data["runtime_h"] - calibration["start_runtime"]
-        if runtime <= 0:
-            raise ValueError("Aucune heure mesurée pendant la calibration")
+        if runtime < MIN_CALIBRATION_HOURS:
+            raise ValueError("Calibration trop courte : attendre au moins une heure de fonctionnement et la consommation réelle du sac.")
         actual_kg = consumed_bags * self.bag_weight
+        new_rate = actual_kg / runtime
+        if not math.isfinite(new_rate) or not MIN_RATE <= new_rate <= MAX_RATE:
+            raise ValueError("Débit de calibration incohérent (0,1 à 5 kg/h). Attendre la consommation réelle des granulés.")
         correction = actual_kg - runtime * self.rate
         self.data["consumed_kg"] += correction
         self.data["stock_kg"] -= correction
-        self.data["kg_per_hour"] = actual_kg / runtime
+        self.data["kg_per_hour"] = new_rate
         self.data["last_calibration"] = {
             **calibration, "end_date": dt_util.as_local(dt_util.utcnow()).date().isoformat(),
             "consumed_bags": consumed_bags, "actual_kg": actual_kg,
