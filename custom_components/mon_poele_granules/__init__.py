@@ -207,6 +207,21 @@ class PelletManager:
         await self.save()
         return len(records)
 
+    async def set_rate(self, rate):
+        """Change the estimate prospectively, preserving all recorded consumption."""
+        if not math.isfinite(rate) or not MIN_RATE <= rate <= MAX_RATE:
+            raise ValueError("Débit incohérent (0,1 à 5 kg/h)")
+        if self.data.get("calibration"):
+            raise ValueError("Terminer la calibration en cours avant de modifier le débit")
+        await self.tick()
+        previous = self.rate
+        self.data["kg_per_hour"] = rate
+        self.data.setdefault("rate_changes", []).append({
+            "date": dt_util.utcnow().isoformat(), "old_rate": previous, "new_rate": rate,
+            "runtime_h": self.data["runtime_h"]
+        })
+        await self.save()
+
     async def start_calibration(self):
         self.data["calibration"] = {
             "start_runtime": self.data["runtime_h"], "start_energy": self.energy,
@@ -272,6 +287,8 @@ async def async_setup_entry(hass, entry):
             await get_manager().maintenance(call.data["entretien"], call.data.get("date", current_date()), call.data.get("prochaine_date", ""), call.data.get("note", ""))
         async def import_history(call):
             await get_manager().import_legacy_csv(call.data["csv_text"])
+        async def set_rate(call):
+            await get_manager().set_rate(float(call.data["kg_per_hour"]))
         async def calib_start(call):
             await get_manager().start_calibration()
         async def calib_end(call):
@@ -281,6 +298,7 @@ async def async_setup_entry(hass, entry):
         hass.services.async_register(DOMAIN, "corriger_stock", adjust, schema=vol.Schema({vol.Required("sacs_reels"): nonnegative, vol.Optional("date"): str, vol.Optional("note"): str}))
         hass.services.async_register(DOMAIN, "ajouter_entretien", maintain, schema=vol.Schema({vol.Required("entretien"): str, vol.Optional("date"): str, vol.Optional("prochaine_date"): str, vol.Optional("note"): str}))
         hass.services.async_register(DOMAIN, "importer_historique", import_history, schema=vol.Schema({vol.Required("csv_text"): str}))
+        hass.services.async_register(DOMAIN, "modifier_debit", set_rate, schema=vol.Schema({vol.Required("kg_per_hour"): vol.All(vol.Coerce(float), vol.Range(min=MIN_RATE, max=MAX_RATE))}))
         hass.services.async_register(DOMAIN, "demarrer_calibration", calib_start)
         hass.services.async_register(DOMAIN, "terminer_calibration", calib_end, schema=vol.Schema({vol.Required("sacs_consommes"): vol.All(vol.Coerce(float), vol.Range(min=0.01))}))
     return True
@@ -292,6 +310,6 @@ async def async_unload_entry(hass, entry):
         if manager:
             await manager.save()
         if not hass.data[DOMAIN]:
-            for action in ("ajouter_achat", "corriger_stock", "ajouter_entretien", "demarrer_calibration", "terminer_calibration", "importer_historique"):
+            for action in ("ajouter_achat", "corriger_stock", "ajouter_entretien", "demarrer_calibration", "terminer_calibration", "importer_historique", "modifier_debit"):
                 hass.services.async_remove(DOMAIN, action)
     return ok
