@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.31 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.35 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -252,17 +252,24 @@ class MonPoeleGranulesCard extends HTMLElement {
             #maintenance .day-cell button[data-date]{font-size:13px!important}
             .dashboard-nav .nav-icon svg{width:17px;height:17px}
           }
-          /* v0.3.34 — calendrier lisible, commandes tactiles conservées */
+          /* v0.3.35 — calendrier compact, commandes tactiles conservées */
           #maintenance .day-cell{display:flex;flex-direction:column;border-radius:8px;min-height:78px;box-sizing:border-box}
           #maintenance .day-cell button[data-date]:not([data-day-action]){flex:1;min-height:34px!important;padding:7px 2px 3px!important;font-size:20px!important;font-weight:700!important;color:#fff!important;text-shadow:0 1px 3px #000;align-items:center!important}
           #maintenance .day-actions{position:static;display:flex;gap:4px;margin:0 4px 4px;min-width:0}
           #maintenance .day-cell button[data-day-action]{width:auto;height:32px!important;min-height:32px!important;padding:0!important;border:1px solid rgba(255,255,255,.28);border-radius:6px!important;background:rgba(12,16,25,.82)!important;color:#fff}
           #maintenance .day-cell button[data-day-action] svg{width:20px;height:20px;min-height:0!important;max-width:100%;margin:0!important;display:block;flex:none}
           .section-calendar #month-label{font-size:18px;color:#fff}
-          .section-calendar #prev-month,.section-calendar #next-month{min-width:44px;min-height:44px;font-size:24px;line-height:1}
+          .section-calendar .calendar-month-nav{margin:4px 0!important}
+          .section-calendar .calendar-legend{margin-top:5px!important}
+          #maintenance .day-kg{font-size:11px;line-height:1;white-space:nowrap;font-weight:600;opacity:.95}
+          #maintenance .day-cell button[data-date]:not([data-day-action]){gap:4px}
+          @media(max-width:520px){#maintenance .day-kg{font-size:9px}#maintenance .day-cell button[data-date]:not([data-day-action]){gap:2px;flex-wrap:wrap}}
+          .section-calendar #prev-month,.section-calendar #next-month{min-width:44px;min-height:36px;font-size:24px;line-height:1}
           @media(min-width:680px){
-            #maintenance .day-cell{min-height:88px}
-            #maintenance .day-cell button[data-day-action]{height:40px!important;min-height:40px!important}
+            #maintenance .day-cell{min-height:70px}
+            #maintenance .day-cell button[data-date]:not([data-day-action]){min-height:28px!important;padding:2px 2px!important}
+            #maintenance .day-actions{margin:0 3px 2px}
+            #maintenance .day-cell button[data-day-action]{height:36px!important;min-height:36px!important}
             #maintenance .day-cell button[data-day-action] svg{width:24px;height:24px}
           }
           @media(max-width:520px){
@@ -548,7 +555,7 @@ class MonPoeleGranulesCard extends HTMLElement {
           </div>
           <div id="message" class="msg" role="status"></div><div class="form" id="settings-form"></div></div>
           <div class="section section-history"><h3><span class="section-symbol">🧾</span> Dernières saisies</h3><div id="purchases"></div></div>
-          <div class="section section-calendar"><h3><span class="section-symbol">📅</span> Calendrier des événements</h3><div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0"><button id="prev-month">‹</button><strong id="month-label"></strong><button id="next-month">›</button></div><div id="maintenance"></div><div id="calendar-choice" class="calendar-choice" hidden></div><div class="form" id="form"></div><div class="small" style="margin-top:12px">🟢 Achat · 🔴 Consommation · 🟠 Entretien · 🔵 Dépannage · 🟣 Révision · 🟣 Nettoyage</div></div>
+          <div class="section section-calendar"><h3><span class="section-symbol">📅</span> Calendrier des événements</h3><div class="calendar-month-nav" style="display:flex;justify-content:space-between;align-items:center;margin:12px 0"><button id="prev-month">‹</button><strong id="month-label"></strong><button id="next-month">›</button></div><div id="maintenance"></div><div id="calendar-choice" class="calendar-choice" hidden></div><div class="form" id="form"></div><div class="small calendar-legend" style="margin-top:12px">🟢 Achat · 🔴 Consommation · 🟠 Entretien · 🔵 Dépannage · 🟣 Révision · 🟣 Nettoyage</div></div>
         </div></ha-card>`;
       this.shadowRoot.querySelectorAll("[data-view-button]").forEach(button=>{
         button.addEventListener("click",()=>this.setView(button.dataset.viewButton));
@@ -762,17 +769,19 @@ class MonPoeleGranulesCard extends HTMLElement {
     const cells=Array.from({length:count},(_,i)=>{
       const date=this.dayKey(new Date(y,m,i+1)),mk=marks[date]||[];
       const colors=[...new Set(mk.map(x=>x.color))];
+      const kg=(Number(days[date]?.kg)||0)+(Number(historicalKg[date])||0);
+      const kgLabel=kg>0?'<span class="day-kg">'+this.escape(kg.toLocaleString("fr-FR",{maximumFractionDigits:1}))+' kg</span>':"";
       const background=colors.length===0?"var(--secondary-background-color,rgba(120,120,120,.13))":
         colors.length===1?colors[0]:
         colors.length===2?"linear-gradient(135deg,"+colors[0]+" 0%, "+colors[0]+" 49.8%, "+colors[1]+" 50.2%, "+colors[1]+" 100%)":
         "conic-gradient("+colors.map((c,j)=>c+" "+(j*100/colors.length)+"% "+((j+1)*100/colors.length)+"%").join(",")+")";
       const current=date===this.dayKey(new Date());
-      return '<div class="day-cell" style="background:'+background+';'+(current?'outline:2px solid var(--primary-color,#ffa726);outline-offset:-2px;':'')+'">'+
-        '<button type="button" data-date="'+date+'" title="'+this.escape(mk.map(x=>x.title).join(" ; "))+'" aria-label="Choisir le '+date+'" style="box-sizing:border-box;display:flex;align-items:flex-start;padding-top:8px;justify-content:center;min-height:clamp(43px,6vw,58px);font-size:clamp(13px,1.7vw,18px);font-weight:'+(mk.length?700:400)+';color:'+(mk.length?'#fff':'inherit')+';background:transparent">'+(i+1)+'</button>'+
+      return '<div class="day-cell" style="background:'+(colors.length?'linear-gradient(rgba(15,22,34,.30),rgba(15,22,34,.30)),':'')+background+';'+(current?'outline:2px solid var(--primary-color,#ffa726);outline-offset:-2px;':'')+'">'+
+        '<button type="button" data-date="'+date+'" title="'+this.escape(mk.map(x=>x.title).join(" ; "))+'" aria-label="Choisir le '+date+'" style="box-sizing:border-box;display:flex;align-items:flex-start;padding-top:8px;justify-content:center;min-height:clamp(43px,6vw,58px);font-size:clamp(13px,1.7vw,18px);font-weight:'+(mk.length?700:400)+';color:'+(mk.length?'#fff':'inherit')+';background:transparent">'+(i+1)+kgLabel+'</button>'+
         '<div class="day-actions"><button type="button" data-day-action="purchase" data-date="'+date+'" aria-label="Ajouter un achat le '+date+'" title="Achat"> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 3h2l3 13h12l3-10H5"/></svg></button>'+
         '<button type="button" data-day-action="maintenance" data-date="'+date+'" aria-label="Ajouter une intervention le '+date+'" title="Intervention"> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3a6 6 0 0 1-8 8L6.5 19a2.5 2.5 0 0 1-3.5-3.5L11 9a6 6 0 0 1 8-8l-4 4 4 4z"/></svg></button></div></div>';
     }).join("");
-    this.shadowRoot.getElementById("maintenance").innerHTML='<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px">'+head+blanks+cells+'</div>';
+    this.shadowRoot.getElementById("maintenance").innerHTML='<div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px">'+head+blanks+cells+'</div>';
     this.showCalendarChoices();
   }
 
