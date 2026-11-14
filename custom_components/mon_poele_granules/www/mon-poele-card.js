@@ -1,4 +1,4 @@
-/* Mon Poêle à Granulés – Lovelace card v0.3.29 */
+/* Mon Poêle à Granulés – Lovelace card v0.3.31 */
 class MonPoeleGranulesCard extends HTMLElement {
   setConfig(config) {
     this.config = config || {};
@@ -64,7 +64,7 @@ class MonPoeleGranulesCard extends HTMLElement {
           .calendar-choice[hidden]{display:none}
           .calendar-choice .date-title{font-weight:700;margin-bottom:12px}
           .calendar-choice .actions button{flex:1;min-width:120px;padding:12px 8px}
-          #form{scroll-margin-top:110px}
+          #form,#settings-form{scroll-margin-top:110px}
           #metric-controls button{font-weight:650;padding:9px 13px}
 
           /* 0.3.7 : présentation complète inspirée du tableau de bord validé */
@@ -526,7 +526,7 @@ class MonPoeleGranulesCard extends HTMLElement {
             <button data-open="stock">Corriger stock</button>
             <button data-open="calibration">Calibrer</button><button id="legacy-import-button" type="button">Importer CSV</button><input id="legacy-import-file" type="file" accept=".csv,text/csv" style="display:none">
           </div>
-          <div id="message" class="msg" role="status"></div></div>
+          <div id="message" class="msg" role="status"></div><div class="form" id="settings-form"></div></div>
           <div class="section section-history"><h3><span class="section-symbol">🧾</span> Dernières saisies</h3><div id="purchases"></div></div>
           <div class="section section-calendar"><h3><span class="section-symbol">📅</span> Calendrier des événements</h3><div style="display:flex;justify-content:space-between;align-items:center;margin:12px 0"><button id="prev-month">‹</button><strong id="month-label"></strong><button id="next-month">›</button></div><div id="maintenance"></div><div id="calendar-choice" class="calendar-choice" hidden></div><div class="form" id="form"></div><div class="small" style="margin-top:12px">🟢 Achat · 🔴 Consommation · 🟠 Entretien · 🔵 Dépannage · 🟣 Révision · 🟣 Nettoyage</div></div>
         </div></ha-card>`;
@@ -780,10 +780,10 @@ class MonPoeleGranulesCard extends HTMLElement {
   }
   openForm(type,chosenDate){
     this._formType=type;
-    const el=this.shadowRoot.getElementById("form");
-    // Keep the shared form inside the visible tab that owns the action.
-    const section=this.shadowRoot.querySelector(type==="stock"||type==="calibration"?".section-tools":".section-calendar");
-    if(section&&el.parentElement!==section)section.appendChild(el);
+    const settings=type==="stock"||type==="calibration";
+    this.setView(settings?"parametres":"calendrier");
+    const el=this.shadowRoot.getElementById(settings?"settings-form":"form");
+    this.shadowRoot.getElementById(settings?"form":"settings-form").classList.remove("open");
     const field=(name,label,inputType="text",value="",required=true)=>
       `<label>${label}<input name="${name}" type="${inputType}" value="${this.escape(value)}" ${required?"required":""} ${inputType==="number"?'min="0" step="any"':""}></label>`;
     const today=chosenDate||this.dayKey(new Date());
@@ -804,7 +804,10 @@ class MonPoeleGranulesCard extends HTMLElement {
     try{
       await this._hass.callService("mon_poele_granules",action,data);
       msg.textContent="✅ Action enregistrée";
-      if(!keepOpen)this.shadowRoot.getElementById("form").classList.remove("open");
+      if(!keepOpen){
+        this.shadowRoot.getElementById("form").classList.remove("open");
+        this.shadowRoot.getElementById("settings-form").classList.remove("open");
+      }
       return true;
     }catch(err){msg.textContent="⚠️ Erreur : "+(err.message||String(err));return false;}
   }
