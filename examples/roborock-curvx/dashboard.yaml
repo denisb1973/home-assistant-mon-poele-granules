@@ -1,0 +1,501 @@
+title: Roborock Qrevo CurvX
+# Dashboard indépendant. Ne touche pas à l'intégration du poêle.
+# La photo doit être placée manuellement dans /config/www/roborock/roborock_salon.png.
+views:
+  - title: Accueil
+    path: accueil
+    icon: mdi:home-variant
+    cards:
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: Accueil
+            icon: mdi:home-variant
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/accueil
+          - type: button
+            name: Carte
+            icon: mdi:map
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/carte
+          - type: button
+            name: Historique
+            icon: mdi:history
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/historique
+          - type: button
+            name: Station
+            icon: mdi:home-automation
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/station
+          - type: button
+            name: Entretien
+            icon: mdi:tools
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/entretien
+          - type: button
+            name: Réglages
+            icon: mdi:cog
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/reglages
+      - type: picture-elements
+        image: /local/roborock/roborock_salon.png
+        elements:
+          - type: state-label
+            entity: sensor.salle_a_manger_roborock_qrevo_curvx_batterie
+            prefix: '🔋 Batterie : '
+            style:
+              left: 76%
+              top: 25%
+              width: 38%
+              padding: 10px
+              border-radius: 12px
+              color: white
+              background: 'rgba(14,20,36,0.78)'
+              font-size: 16px
+          - type: state-label
+            entity: sensor.salle_a_manger_roborock_qrevo_curvx_etat
+            prefix: '🤖 État : '
+            style:
+              left: 76%
+              top: 43%
+              width: 38%
+              padding: 10px
+              border-radius: 12px
+              color: white
+              background: 'rgba(14,20,36,0.78)'
+              font-size: 16px
+          - type: state-label
+            entity: sensor.salle_a_manger_roborock_qrevo_curvx_piece_actuelle
+            prefix: '📍 Pièce : '
+            style:
+              left: 76%
+              top: 61%
+              width: 38%
+              padding: 10px
+              border-radius: 12px
+              color: white
+              background: 'rgba(14,20,36,0.78)'
+              font-size: 16px
+          - type: icon
+            icon: mdi:map
+            style:
+              left: 87%
+              top: 84%
+              color: white
+              '--mdc-icon-size': 38px
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/carte
+      - type: grid
+        columns: 2
+        square: false
+        cards:
+          - type: gauge
+            entity: sensor.salle_a_manger_roborock_qrevo_curvx_batterie
+            name: Batterie
+            min: 0
+            max: 100
+            needle: true
+            severity:
+              red: 0
+              yellow: 20
+              green: 60
+          - type: gauge
+            entity: sensor.salle_a_manger_roborock_qrevo_curvx_progression_du_nettoyage
+            name: Progression
+            min: 0
+            max: 100
+            needle: true
+      - type: tile
+        entity: vacuum.salle_a_manger_roborock_qrevo_curvx
+        name: Commandes du robot
+        icon: mdi:robot-vacuum
+        features:
+          - type: vacuum-commands
+            commands:
+              - start_pause
+              - stop
+              - return_home
+      - type: entities
+        title: Résumé
+        show_header_toggle: false
+        entities:
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_surface_de_nettoyage
+            name: Surface nettoyée
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_duree_de_nettoyage
+            name: Durée
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_piece_actuelle
+            name: Pièce actuelle
+  - title: Carte
+    path: carte
+    icon: mdi:map
+    cards:
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: Accueil
+            icon: mdi:home-variant
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/accueil
+          - type: button
+            name: Carte
+            icon: mdi:map
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/carte
+          - type: button
+            name: Historique
+            icon: mdi:history
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/historique
+          - type: button
+            name: Station
+            icon: mdi:home-automation
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/station
+          - type: button
+            name: Entretien
+            icon: mdi:tools
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/entretien
+          - type: button
+            name: Réglages
+            icon: mdi:cog
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/reglages
+      - type: picture-entity
+        entity: image.salle_a_manger_roborock_qrevo_curvx_map_0
+        name: Carte du logement
+        show_name: false
+        show_state: false
+        fit_mode: contain
+      - type: tile
+        entity: vacuum.salle_a_manger_roborock_qrevo_curvx
+        name: Commandes du robot
+        icon: mdi:robot-vacuum
+        features:
+          - type: vacuum-commands
+            commands:
+              - start_pause
+              - stop
+              - return_home
+      - type: entities
+        title: Position et progression
+        show_header_toggle: false
+        entities:
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_piece_actuelle
+            name: Pièce actuelle
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_progression_du_nettoyage
+            name: Progression
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_surface_de_nettoyage
+            name: Surface
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_duree_de_nettoyage
+            name: Durée
+  - title: Historique
+    path: historique
+    icon: mdi:history
+    cards:
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: Accueil
+            icon: mdi:home-variant
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/accueil
+          - type: button
+            name: Carte
+            icon: mdi:map
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/carte
+          - type: button
+            name: Historique
+            icon: mdi:history
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/historique
+          - type: button
+            name: Station
+            icon: mdi:home-automation
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/station
+          - type: button
+            name: Entretien
+            icon: mdi:tools
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/entretien
+          - type: button
+            name: Réglages
+            icon: mdi:cog
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/reglages
+      - type: entities
+        title: Dernier nettoyage
+        show_header_toggle: false
+        entities:
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_debut_du_dernier_nettoyage
+            name: Début
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_fin_du_dernier_nettoyage
+            name: Fin
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_surface_de_nettoyage
+            name: Surface
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_duree_de_nettoyage
+            name: Durée
+      - type: entities
+        title: Statistiques cumulées
+        show_header_toggle: false
+        entities:
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_nombre_total_de_nettoyages
+            name: Nombre de nettoyages
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_surface_de_nettoyage_totale
+            name: Surface totale
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_duree_totale_de_nettoyage
+            name: Durée totale
+  - title: Station
+    path: station
+    icon: mdi:home-automation
+    cards:
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: Accueil
+            icon: mdi:home-variant
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/accueil
+          - type: button
+            name: Carte
+            icon: mdi:map
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/carte
+          - type: button
+            name: Historique
+            icon: mdi:history
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/historique
+          - type: button
+            name: Station
+            icon: mdi:home-automation
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/station
+          - type: button
+            name: Entretien
+            icon: mdi:tools
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/entretien
+          - type: button
+            name: Réglages
+            icon: mdi:cog
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/reglages
+      - type: entities
+        title: Commandes de station
+        show_header_toggle: false
+        entities:
+          - entity: switch.salle_a_manger_roborock_qrevo_curvx_dock_lavage_de_la_serpilliere
+            name: Lavage serpillière
+          - entity: switch.salle_a_manger_roborock_qrevo_curvx_dock_sechage_de_la_serpilliere
+            name: Séchage serpillière
+          - entity: switch.salle_a_manger_roborock_qrevo_curvx_dock_vidage_de_la_poussiere
+            name: Vidage poussière
+          - entity: select.salle_a_manger_roborock_qrevo_curvx_dock_mode_de_vidage
+            name: Mode de vidage
+      - type: entities
+        title: Réservoirs et alertes
+        show_header_toggle: false
+        entities:
+          - entity: binary_sensor.salle_a_manger_roborock_qrevo_curvx_dock_reservoir_d_eau_propre
+            name: Réservoir eau propre
+          - entity: binary_sensor.salle_a_manger_roborock_qrevo_curvx_dock_reservoir_d_eau_sale
+            name: Réservoir eau sale
+          - entity: binary_sensor.salle_a_manger_roborock_qrevo_curvx_penurie_d_eau
+            name: Pénurie d'eau
+          - entity: binary_sensor.salle_a_manger_roborock_qrevo_curvx_reservoir_d_eau_fixe
+            name: Réservoir fixé
+          - entity: binary_sensor.salle_a_manger_roborock_qrevo_curvx_serpilliere_fixee
+            name: Serpillière fixée
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_dock_erreur_de_dock
+            name: Erreur de station
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_dock_temps_de_sechage_de_la_serpilliere_restant
+            name: Séchage restant
+  - title: Entretien
+    path: entretien
+    icon: mdi:tools
+    cards:
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: Accueil
+            icon: mdi:home-variant
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/accueil
+          - type: button
+            name: Carte
+            icon: mdi:map
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/carte
+          - type: button
+            name: Historique
+            icon: mdi:history
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/historique
+          - type: button
+            name: Station
+            icon: mdi:home-automation
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/station
+          - type: button
+            name: Entretien
+            icon: mdi:tools
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/entretien
+          - type: button
+            name: Réglages
+            icon: mdi:cog
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/reglages
+      - type: entities
+        title: Consommables
+        show_header_toggle: false
+        entities:
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_temps_restant_brosse_principale
+            name: Brosse principale
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_temps_restant_brosse_laterale
+            name: Brosse latérale
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_temps_restant_filtre
+            name: Filtre
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_temps_restant_capteurs
+            name: Capteurs
+          - entity: sensor.salle_a_manger_roborock_qrevo_curvx_dock_duree_restante_avant_nettoyage_de_la_crepine
+            name: Crépine
+  - title: Réglages
+    path: reglages
+    icon: mdi:cog
+    cards:
+      - type: horizontal-stack
+        cards:
+          - type: button
+            name: Accueil
+            icon: mdi:home-variant
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/accueil
+          - type: button
+            name: Carte
+            icon: mdi:map
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/carte
+          - type: button
+            name: Historique
+            icon: mdi:history
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/historique
+          - type: button
+            name: Station
+            icon: mdi:home-automation
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/station
+          - type: button
+            name: Entretien
+            icon: mdi:tools
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/entretien
+          - type: button
+            name: Réglages
+            icon: mdi:cog
+            show_state: false
+            tap_action:
+              action: navigate
+              navigation_path: /roborock-curvx/reglages
+      - type: entities
+        title: Modes de nettoyage
+        show_header_toggle: false
+        entities:
+          - entity: select.salle_a_manger_roborock_qrevo_curvx_mode_de_nettoyage
+            name: Mode
+          - entity: select.salle_a_manger_roborock_qrevo_curvx_intensite_de_frottement
+            name: Intensité de lavage
+          - entity: select.salle_a_manger_roborock_qrevo_curvx_parcours_de_lavage_de_sol
+            name: Parcours de lavage
+          - entity: select.salle_a_manger_roborock_qrevo_curvx_carte_selectionnee
+            name: Carte sélectionnée
+      - type: entities
+        title: Préférences
+        show_header_toggle: false
+        entities:
+          - entity: number.salle_a_manger_roborock_qrevo_curvx_volume
+            name: Volume
+          - entity: switch.salle_a_manger_roborock_qrevo_curvx_ne_pas_deranger
+            name: Ne pas déranger
+          - entity: time.salle_a_manger_roborock_qrevo_curvx_ne_pas_deranger_debut
+            name: Début
+          - entity: time.salle_a_manger_roborock_qrevo_curvx_ne_pas_deranger_fin
+            name: Fin
+          - entity: switch.salle_a_manger_roborock_qrevo_curvx_dock_securite_enfant
+            name: Sécurité enfant
